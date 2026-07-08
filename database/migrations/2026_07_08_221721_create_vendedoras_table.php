@@ -13,6 +13,19 @@ return new class extends Migration
     {
         Schema::create('vendedoras', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('nome');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->date('data_nascimento');
+            $table->integer('CEP');
+            $table->string('rua');
+            $table->string('bairro');
+            $table->string('cidade');
+            $table->string('estado');
+            $table->integer('numero');
+            $table->string('role')->default('user');
+            $table->rememberToken();
             $table->timestamps();
         });
     }
