@@ -11,11 +11,11 @@
         </ul>
 
         <div class="nav-cta">
-            {{-- @auth / @guest exigem o sistema de autenticação do Laravel configurado --}}
-            @auth
+            {{-- Login manual via sessão (Vendedora não usa o Auth padrão do Laravel) --}}
+            @if (session('vendedora_id'))
                 <div class="nav-user">
                     <div class="avatar-sm"></div>
-                    <span>{{ Auth::user()->name }}</span>
+                    <span>{{ session('vendedora_nome') }}</span>
                 </div>
                 <form action="{{ route('logout') ?? '#' }}" method="POST">
                     @csrf
@@ -24,7 +24,7 @@
             @else
                 <a href="{{ route('login') ?? '#' }}" class="btn btn-ghost" style="padding:10px 18px;">Entrar</a>
                 <a href="{{ route('cadastro') ?? '#' }}" class="btn btn-primary" style="padding:10px 20px;">Criar conta</a>
-            @endauth
+            @endif
         </div>
 
         <button class="nav-toggle" aria-label="Abrir menu">☰</button>
