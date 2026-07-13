@@ -40,6 +40,68 @@ class AuthController extends Controller
             'email' => 'Usuário ou senha inválidos'
         ]);
     }
+    /**
+     * Método para mostrar o formulário de cadastro (GET)
+     */
+    public function showRegisterForm()
+    {
+        return view('auth.cadastro'); // <-- Abre a view correta que revisamos!
+    }
+
+    /**
+     * Método para PROCESSAR o cadastro (POST)
+     */
+    public function register(Request $request)
+    {
+        // 1. Validação dos dados exatos que estão na sua View ajustada
+        $request->validate([
+            'nome' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'data_nascimento' => ['required', 'date'],
+            'tipo_perfil' => ['required', 'in:cliente,vendedora'],
+            'CEP' => ['required', 'string'],
+            'rua' => ['required', 'string'],
+            'numero' => ['required', 'string'],
+            'bairro' => ['required', 'string'],
+            'cidade' => ['required', 'string'],
+            'estado' => ['required', 'string'],
+        ]);
+
+        // 2. Lógica para salvar no banco dependendo do tipo de perfil escolhido
+        if ($request->tipo_perfil === 'vendedora') {
+            // Se for vendedora, salva na tabela/model de vendedoras
+            $vendedora = \App\Models\Vendedora::create([
+                'nome' => $request->nome,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'data_nascimento' => $request->data_nascimento,
+                'CEP' => $request->CEP,
+                'rua' => $request->rua,
+                'numero' => $request->numero,
+                'bairro' => $request->bairro,
+                'cidade' => $request->cidade,
+                'estado' => $request->estado,
+            ]);
+
+            // Cria a sessão customizada para vendedora
+            session(['vendedora_id' => $vendedora->id]);
+            return redirect('/home')->with('success', 'Cadastro de criadora realizado com sucesso!');
+        }
+
+        // Se for cliente comum, cria o usuário no fluxo padrão do Laravel
+        $user = \App\Models\User::create([
+            'name' => $request->nome, // Se sua tabela users usa 'name'
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => 'cliente',
+            // adicione os outros campos de endereço no model User se necessário
+        ]);
+
+        Auth::login($user);
+
+        return redirect('/home')->with('success', 'Cadastro realizado com sucesso!');
+    }
 
     // Método para fazer o LOGOUT
     public function logout(Request $request)

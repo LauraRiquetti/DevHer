@@ -20,8 +20,8 @@
                 @csrf
 
                 <div class="field">
-                    <label for="name">Nome completo</label>
-                    <input type="text" name="name" id="name" placeholder="Seu nome completo" value="{{ old('name') }}" required>
+                    <label for="nome">Nome completo</label>
+                    <input type="text" name="nome" id="nome" placeholder="Seu nome completo" value="{{ old('nome') }}" required>
                 </div>
 
                 <div class="field">
@@ -41,8 +41,8 @@
                 </div>
 
                 <div class="field">
-                    <label for="birthdate">Data de nascimento</label>
-                    <input type="date" name="birthdate" id="birthdate" value="{{ old('birthdate') }}" required>
+                    <label for="data_nascimento">Data de nascimento</label>
+                    <input type="date" name="data_nascimento" id="data_nascimento" value="{{ old('data_nascimento') }}" required>
                     <small style="color:var(--muted-2);font-size:12px;display:block;margin-top:6px;">
                         Usada para liberar o acesso a cursos com restrição de idade (18+).
                     </small>
@@ -56,7 +56,7 @@
                             Cliente<br><span style="color:var(--muted-2);font-size:11.5px;">Quero aprender e comprar</span>
                         </label>
                         <label class="radio-card">
-                            <input type="radio" name="tipo_perfil" value="criadora">
+                            <input type="radio" name="tipo_perfil" value="vendedora">
                             Criadora<br><span style="color:var(--muted-2);font-size:11.5px;">Quero publicar e vender</span>
                         </label>
                     </div>
