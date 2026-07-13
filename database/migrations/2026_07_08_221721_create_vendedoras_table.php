@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->date('data_nascimento');
+            $table->integer('CPF')->unique();
+            $table->string('telefone');
             $table->integer('CEP');
             $table->string('rua');
             $table->string('bairro');
