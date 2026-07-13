@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VendedoraController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,3 +65,9 @@ Route::delete('/admin/{id}/remover', function ($id) { return back(); })->name('a
 // Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 // Route::get('/usuarios/novo', [UsuarioController::class, 'create'])->name('usuarios.create');
 // Route::get('/usuarios/{id}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
+
+// Rota GET para abrir a página do formulário de esqueci senha
+Route::get('/esqueci-senha', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+
+// Rota POST que o formulário chama (aquela que estava dando erro!)
+Route::post('/esqueci-senha', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
