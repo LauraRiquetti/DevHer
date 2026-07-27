@@ -16,6 +16,8 @@ class Cliente extends Authenticatable
         'nome',
         'email',
         'password',
+        'CPF',
+        'telefone', // <-- ADICIONE ESTA LINHA
         'data_nascimento',
         'CEP',
         'rua',
@@ -23,7 +25,7 @@ class Cliente extends Authenticatable
         'cidade',
         'estado',
         'numero',
-        'role' 
+        'role',
     ];
     protected $hidden = [
         'password',

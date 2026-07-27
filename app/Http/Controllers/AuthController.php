@@ -2,23 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cliente;
+use App\Models\User;
+use App\Models\Vendedora;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
-    // Método para mostrar o formulário (GET)
+    /**
+     * Exibe a tela de Login
+     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Método para PROCESSAR o login (POST)
+    /**
+     * Processa a autenticação única para qualquer perfil (Admin, Cliente, Vendedora)
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required','email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
@@ -37,83 +46,101 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Usuário ou senha inválidos'
-        ]);
+            'email' => 'As credenciais informadas não correspondem aos nossos registros.',
+        ])->onlyInput('email');
     }
+
     /**
-     * Método para mostrar o formulário de cadastro (GET)
+     * Exibe o formulário de cadastro público
      */
     public function showRegisterForm()
     {
-        return view('auth.cadastro'); // <-- Abre a view correta que revisamos!
+        return view('auth.cadastro');
     }
 
     /**
-     * Método para PROCESSAR o cadastro (POST)
+     * Processa o cadastro público e vincula ao perfil correto
      */
     public function register(Request $request)
     {
-        // 1. Validação dos dados exatos que estão na sua View ajustada
-        $request->validate([
-            'nome' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        $validated = $request->validate([
+            'nome'            => ['required', 'string', 'max:255'],
+            'email'           => ['required', 'string', 'email', 'max:255', 'unique:users,email', 'unique:clientes,email', 'unique:vendedoras,email'],
+            'password'        => ['required', 'string', 'min:8', 'confirmed'],
+            'cpf'             => ['required', 'string'],
+            'telefone'        => ['required', 'string'],
             'data_nascimento' => ['required', 'date'],
-            'tipo_perfil' => ['required', 'in:cliente,vendedora'],
-            'CEP' => ['required', 'string'],
-            'rua' => ['required', 'string'],
-            'numero' => ['required', 'string'],
-            'bairro' => ['required', 'string'],
-            'cidade' => ['required', 'string'],
-            'estado' => ['required', 'string'],
+            'tipo_perfil'     => ['required', 'in:cliente,vendedora'],
+            'cep'             => ['required', 'string'],
+            'rua'             => ['required', 'string'],
+            'numero'          => ['required', 'numeric'],
+            'bairro'          => ['required', 'string'],
+            'cidade'          => ['required', 'string'],
+            'estado'          => ['required', 'string', 'max:2'],
         ]);
 
-        // 2. Lógica para salvar no banco dependendo do tipo de perfil escolhido
-        if ($request->tipo_perfil === 'vendedora') {
-            // Se for vendedora, salva na tabela/model de vendedoras
-            $vendedora = \App\Models\Vendedora::create([
-                'nome' => $request->nome,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'data_nascimento' => $request->data_nascimento,
-                'CEP' => $request->CEP,
-                'rua' => $request->rua,
-                'numero' => $request->numero,
-                'bairro' => $request->bairro,
-                'cidade' => $request->cidade,
-                'estado' => $request->estado,
+        // Trata máscaras mantendo apenas os números como STRING (evita estouro de int no MySQL)
+        $cpfLimpo = preg_replace('/[^0-9]/', '', $validated['cpf']);
+        $cepLimpo = preg_replace('/[^0-9]/', '', $validated['cep']);
+
+        // Uso de transação para garantir integridade (ou cria ambos, ou aborta)
+        $user = DB::transaction(function () use ($validated, $cpfLimpo, $cepLimpo) {
+            // 1. Cria a conta de autenticação base
+            $user = User::create([
+                'name'     => $validated['nome'],
+                'email'    => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role'     => $validated['tipo_perfil'],
             ]);
 
-            // Cria a sessão customizada para vendedora
-            session(['vendedora_id' => $vendedora->id]);
-            return redirect('/home')->with('success', 'Cadastro de criadora realizado com sucesso!');
-        }
+            // 2. Prepara os dados detalhados para a tabela específica
+            $dadosPerfil = [
+                'user_id'         => $user->id,
+                'nome'            => $validated['nome'],
+                'email'           => $validated['email'],
+                'password'        => Hash::make($validated['password']),
+                'CPF'             => $cpfLimpo, // Enviado como String
+                'telefone'        => $validated['telefone'],
+                'data_nascimento' => $validated['data_nascimento'],
+                'CEP'             => $cepLimpo, // Enviado como String
+                'rua'             => $validated['rua'],
+                'bairro'          => $validated['bairro'],
+                'cidade'          => $validated['cidade'],
+                'estado'          => strtoupper($validated['estado']),
+                'numero'          => (int) $validated['numero'],
+                'role'            => $validated['tipo_perfil'],
+            ];
 
-        // Se for cliente comum, cria o usuário no fluxo padrão do Laravel
-        $user = \App\Models\User::create([
-            'name' => $request->nome, // Se sua tabela users usa 'name'
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => 'cliente',
-            // adicione os outros campos de endereço no model User se necessário
-        ]);
+            // 3. Salva no model do perfil correspondente
+            if ($validated['tipo_perfil'] === 'vendedora') {
+                Vendedora::create($dadosPerfil);
+            } else {
+                Cliente::create($dadosPerfil);
+            }
 
+            return $user;
+        });
+
+        // Autentica o novo usuário e redireciona
         Auth::login($user);
 
-        return redirect('/home')->with('success', 'Cadastro realizado com sucesso!');
+        return redirect('/login')->with('success', 'Cadastro realizado com sucesso.');
     }
 
-    // Método para fazer o LOGOUT
+    /**
+     * Encerra a sessão do usuário
+     */
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Você saiu com sucesso!');
+        return redirect('/')->with('success', 'Sessão encerrada.');
     }
+
     /**
-     * Mostra a tela de "Esqueci a Senha" (GET)
+     * Tela de solicitação de recuperação de senha
      */
     public function showForgotPasswordForm()
     {
@@ -121,22 +148,19 @@ class AuthController extends Controller
     }
 
     /**
-     * Processa o envio do e-mail de recuperação pelo Gmail (POST)
+     * Envia o e-mail de redefinição de senha
      */
     public function sendResetLinkEmail(Request $request)
     {
-        // 1. Valida se o e-mail foi digitado e se ele realmente existe no banco
         $request->validate(
             ['email' => 'required|email|exists:users,email'],
-            ['email.exists' => 'Este e-mail não está cadastrado no nosso sistema.']
+            ['email.exists' => 'Não encontramos uma conta cadastrada com este e-mail.']
         );
 
-        // 2. Dispara o e-mail usando o motor do Laravel + configurações do seu .env
         $status = Password::sendResetLink($request->only('email'));
 
-        // 3. Retorna o usuário com o feedback correto
         if ($status === Password::RESET_LINK_SENT) {
-            return back()->with('status', 'Enviamos o link de recuperação para o seu e-mail!');
+            return back()->with('status', 'Enviamos o link de redefinição para o seu e-mail!');
         }
 
         return back()->withErrors(['email' => 'Não foi possível enviar o e-mail. Tente novamente.']);

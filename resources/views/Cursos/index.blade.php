@@ -4,17 +4,6 @@
 
 @section('content')
 
-@php
-    $cursos = $cursos ?? [
-        ['titulo' => 'Lógica de programação do zero', 'carga' => '4h', 'preco' => null, 'restrito' => false],
-        ['titulo' => 'Segurança ofensiva na prática', 'carga' => '8h', 'preco' => '149,00', 'restrito' => true],
-        ['titulo' => 'Design de produto para devs', 'carga' => '5h', 'preco' => '79,00', 'restrito' => false],
-        ['titulo' => 'Introdução a bancos de dados', 'carga' => '6h', 'preco' => null, 'restrito' => false],
-    ];
-    // RF06: idade mínima calculada a partir da data de nascimento do usuário autenticado
-    $idadeUsuaria = $idadeUsuaria ?? null;
-@endphp
-
 <section class="page-head">
     <div class="glow glow-1" style="top:-260px;"></div>
     <div class="wrap">
@@ -26,16 +15,32 @@
 
 <section style="padding:48px 0 100px;">
     <div class="wrap" style="max-width:760px;">
-        @foreach ($cursos as $curso)
-            @php $bloqueado = $curso['restrito'] && ($idadeUsuaria === null || $idadeUsuaria < 18); @endphp
+        @forelse ($cursos as $curso)
+            @php 
+                // Verifica se o curso tem a flag/propriedade de restrição (ex: via categoria ou atributo is_18plus)
+                $isRestrito = isset($curso->is_18plus) ? $curso->is_18plus : ($curso->categoria === '18+');
+                $bloqueado = $isRestrito && ($idadeUsuaria === null || $idadeUsuaria < 18); 
+            @endphp
+
             <div class="course-row" style="{{ $bloqueado ? 'opacity:.55;' : '' }}">
-                <div class="course-thumb">{{ Str::upper(Str::substr($curso['titulo'], 0, 2)) }}</div>
+                <div class="course-thumb">
+                    {{ Str::upper(Str::substr($curso->nome, 0, 2)) }}
+                </div>
                 <div>
-                    <h4>{{ $curso['titulo'] }}</h4>
-                    <span>{{ $curso['preco'] ? 'R$ '.$curso['preco'] : 'Gratuito' }} · {{ $curso['carga'] }}</span>
+                    <h4>{{ $curso->nome }}</h4>
+                    <span>
+                        @if(($curso->preco ?? 0) == 0)
+                            Gratuito
+                        @else
+                            R$ {{ number_format($curso->preco, 2, ',', '.') }}
+                        @endif
+                        @if($curso->duracao)
+                            · {{ $curso->duracao }}
+                        @endif
+                    </span>
                 </div>
 
-                @if ($curso['restrito'])
+                @if ($isRestrito)
                     <span class="badge-18">18+</span>
                 @else
                     <span class="badge-free">Livre</span>
@@ -47,7 +52,18 @@
                     Este curso é liberado apenas para usuárias com 18 anos ou mais.
                 </p>
             @endif
-        @endforeach
+        @empty
+            <p style="color:var(--muted); text-align:center; padding: 32px 0;">
+                Nenhum curso cadastrado no momento.
+            </p>
+        @endforelse
     </div>
 </section>
+@auth
+    @if(auth()->user()->tipo === 'vendedora')
+        <div style="margin-bottom: 24px; text-align: right;">
+            <a href="{{ route('cursos.create') }}" class="btn btn-primary">+ Novo Curso</a>
+        </div>
+    @endif
+@endauth
 @endsection

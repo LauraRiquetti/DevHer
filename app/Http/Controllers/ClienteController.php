@@ -3,24 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 class ClienteController extends Controller
 {
-
     public function buscarCep($cep)
     {
-        $response = Http::get("https://viacep.com.br/ws/$cep/json/");
+        $cepLimpo = preg_replace('/[^0-9]/', '', $cep);
+        $response = Http::get("https://viacep.com.br/ws/{$cepLimpo}/json/");
 
-        $dados = $response->json();
-
-        return response()->json($dados);
+        return response()->json($response->json());
     }
+
     public function index()
     {
-        $clientes = Cliente::orderByDesc('id')->get();
+        $clientes = Cliente::with('user')->orderByDesc('id')->get();
 
         return view('clientes.index', compact('clientes'));
     }
@@ -32,78 +33,122 @@ class ClienteController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nome' => 'required|string',
-            'email' =>'required|email|unique:clientes,email',
-            'password' => 'required|min:6',
+        $validated = $request->validate([
+            'nome'            => 'required|string|max:255',
+            'email'           => 'required|email|unique:users,email|unique:clientes,email',
+            'password'        => 'required|min:8',
+            'CPF'             => 'required|string',
+            'telefone'        => 'required|string',
             'data_nascimento' => 'required|date',
-            'CEP' => 'required',
-            'rua' => 'required|string',
-            'bairro' => 'required|string',
-            'cidade' => 'required|string',
-            'estado' => 'required|string',
-            'numero' => 'required',
+            'CEP'             => 'required|string',
+            'rua'             => 'required|string',
+            'bairro'          => 'required|string',
+            'cidade'          => 'required|string',
+            'estado'          => 'required|string|max:2',
+            'numero'          => 'required|numeric',
         ]);
 
-        Cliente::create([
-            'nome' =>$request->nome,
-            'email' =>$request->email,
-            'password' => Hash::make($request->password),
-            'data_nascimento' =>$request->data_nascimento,
-            'CEP' =>$request->CEP,
-            'rua' =>$request->rua,
-            'bairro' =>$request->bairro,
-            'cidade' =>$request->cidade,
-            'estado' =>$request->estado,
-            'numero' =>$request->numero,
-        ]);
+        $cpfLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CPF']);
+        $cepLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CEP']);
 
-        return redirect('/login');
+        // Transação para garantir integridade entre users e clientes
+        DB::transaction(function () use ($validated, $cpfLimpo, $cepLimpo) {
+            $user = User::create([
+                'name'     => $validated['nome'],
+                'email'    => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role'     => 'cliente',
+            ]);
+
+            Cliente::create([
+                'user_id'         => $user->id,
+                'nome'            => $validated['nome'],
+                'email'           => $validated['email'],
+                'password'        => Hash::make($validated['password']),
+                'CPF'             => $cpfLimpo,
+                'telefone'        => $validated['telefone'],
+                'data_nascimento' => $validated['data_nascimento'],
+                'CEP'             => $cepLimpo,
+                'rua'             => $validated['rua'],
+                'bairro'          => $validated['bairro'],
+                'cidade'          => $validated['cidade'],
+                'estado'          => strtoupper($validated['estado']),
+                'numero'          => (int) $validated['numero'],
+                'role'            => 'cliente',
+            ]);
+        });
+
+        return redirect('/login')->with('success', 'Cliente cadastrado com sucesso!');
     }
 
     public function update(Request $request, Cliente $cliente)
     {
-        $rules = [
-            'nome'            => 'required|string',
-            'email'           => 'required|email|unique:usuarios,email,' . $cliente->id,
+        $validated = $request->validate([
+            'nome'            => 'required|string|max:255',
+            'email'           => 'required|email|unique:clientes,email,' . $cliente->id,
+            'CPF'             => 'required|string',
+            'telefone'        => 'required|string',
             'data_nascimento' => 'required|date',
-            'CEP'             => 'required',
+            'CEP'             => 'required|string',
             'rua'             => 'required|string',
             'bairro'          => 'required|string',
             'cidade'          => 'required|string',
-            'estado'          => 'required|string',
-            'numero'          => 'required',
-            'password'        => 'nullable|min:6',
-        ];
+            'estado'          => 'required|string|max:2',
+            'numero'          => 'required|numeric',
+            'password'        => 'nullable|min:8',
+        ]);
 
-        $validated = $request->validate($rules);
+        $cpfLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CPF']);
+        $cepLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CEP']);
 
-        $dados = [
-            'nome'            => $validated['nome'],
-            'email'           => $validated['email'],
-            'data_nascimento' => $validated['data_nascimento'],
-            'CEP'             => $validated['CEP'],
-            'rua'             => $validated['rua'],
-            'bairro'          => $validated['bairro'],
-            'cidade'          => $validated['cidade'],
-            'estado'          => $validated['estado'],
-            'numero'          => $validated['numero'],
-        ];
+        DB::transaction(function () use ($request, $cliente, $validated, $cpfLimpo, $cepLimpo) {
+            // Atualiza o perfil do Cliente
+            $dadosCliente = [
+                'nome'            => $validated['nome'],
+                'email'           => $validated['email'],
+                'CPF'             => $cpfLimpo,
+                'telefone'        => $validated['telefone'],
+                'data_nascimento' => $validated['data_nascimento'],
+                'CEP'             => $cepLimpo,
+                'rua'             => $validated['rua'],
+                'bairro'          => $validated['bairro'],
+                'cidade'          => $validated['cidade'],
+                'estado'          => strtoupper($validated['estado']),
+                'numero'          => (int) $validated['numero'],
+            ];
 
-        //Só adiciona a senha se o usuário digitou algo
-        if ($request->filled('password')) {
-            $dados['password'] = Hash::make($request->password);
-        }
+            if ($request->filled('password')) {
+                $dadosCliente['password'] = Hash::make($request->password);
+            }
 
-        //Salva tudo de uma vez
-        $cliente->update($dados);
+            $cliente->update($dadosCliente);
 
-        return redirect()->route('clientes.index')->with('success', 'Perfil atualizado!');
+            // Sincroniza o usuário principal na tabela 'users'
+            if ($cliente->user) {
+                $dadosUser = [
+                    'name'  => $validated['nome'],
+                    'email' => $validated['email'],
+                ];
+                if ($request->filled('password')) {
+                    $dadosUser['password'] = Hash::make($request->password);
+                }
+                $cliente->user->update($dadosUser);
+            }
+        });
+
+        return redirect()->route('clientes.index')->with('success', 'Perfil do cliente atualizado!');
     }
 
     public function destroy(Cliente $cliente)
     {
-        $cliente->delete();
-        return redirect()->route('clientes.index');
+        DB::transaction(function () use ($cliente) {
+            if ($cliente->user) {
+                $cliente->user->delete(); // Apaga o User e via cascade remove o Cliente
+            } else {
+                $cliente->delete();
+            }
+        });
+
+        return redirect()->route('clientes.index')->with('success', 'Cliente removido com sucesso!');
     }
 }

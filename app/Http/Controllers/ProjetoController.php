@@ -7,9 +7,22 @@ use Illuminate\Http\Request;
 
 class ProjetoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $projetos = Projeto::orderByDesc('id')->get();
+        $query = Projeto::with('user'); // Carrega a relação para buscar o nome do autor
+
+        // Filtro por busca de texto no nome do projeto
+        if ($request->filled('busca')) {
+            $query->where('nome', 'like', '%' . $request->busca . '%');
+        }
+
+        // Filtro por status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $projetos = $query->orderByDesc('id')->paginate(9)->withQueryString();
+
         return view('projetos.index', compact('projetos'));
     }
 
@@ -20,39 +33,46 @@ class ProjetoController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Valida os dados de acordo com as colunas da migration
-        $dadosValidados = $request->validate([
-            'nome'      => 'required|string|max:255',
-            'preco'     => 'required|numeric|min:0',
-            'descricao' => 'nullable|string',
-            'status'    => 'required|in:disponivel,vendido',
-            'imagem'    => 'nullable|string', // Caso envie a URL ou caminho da imagem
-            'user_id'   => 'required|exists:users,id', // Ajustado para a tabela padrão 'users' do Laravel
-        ], [
-            'status.in'       => 'O status selecionado é inválido.',
-            'user_id.exists'  => 'O responsável selecionado não foi encontrado.',
+        // 1. Validação adaptada aos campos do formulário e migration
+        $request->validate([
+            'nome'        => 'required|string|max:255',
+            'preco'       => 'required|numeric|min:0',
+            'descricao'   => 'nullable|string',
+            'status'      => 'required|in:disponivel,vendido',
+            'imagem_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Valida se é imagem
         ]);
 
-        // 2. Cria o projeto
-        Projeto::create($dadosValidados);
+        // 2. Prepara os dados base
+        $dados = [
+            'nome'      => $request->nome,
+            'preco'     => $request->preco,
+            'descricao' => $request->descricao,
+            'status'    => $request->status,
+            'user_id'   => auth()->id(), // Pega o id do usuário logado
+        ];
+
+        // 3. Processa o upload da imagem (se tiver sido enviada)
+        if ($request->hasFile('imagem_file') && $request->file('imagem_file')->isValid()) {
+            $caminhoImagem = $request->file('imagem_file')->store('projetos', 'public');
+            $dados['imagem'] = '/storage/' . $caminhoImagem;
+        }
+
+        // 4. Cria o registro no banco MySQL
+        Projeto::create($dados);
 
         return redirect()->route('projetos.index')
-            ->with('success', 'Projeto cadastrado com sucesso!');
-    }   
-
+            ->with('success', 'Projeto publicado com sucesso!');
+    }
     public function update(Request $request, Projeto $projeto)
     {
-        // 1. Valida os dados que podem ser atualizados
         $dadosValidados = $request->validate([
             'nome'      => 'required|string|max:255',
             'preco'     => 'required|numeric|min:0',
             'descricao' => 'nullable|string',
             'status'    => 'required|in:disponivel,vendido',
             'imagem'    => 'nullable|string',
-            'user_id'   => 'required|exists:users,id',
         ]);
 
-        // 2. Corrigido o erro de digitação ($prejeto -> $projeto)
         $projeto->update($dadosValidados);
 
         return redirect()->route('projetos.index')
@@ -65,18 +85,5 @@ class ProjetoController extends Controller
         
         return redirect()->route('projetos.index')
             ->with('success', 'Projeto excluído com sucesso!');
-    }
-    
-    /* Filtro para buscar pelo status de disponivel */
-    public function porStatus($status)
-    {
-        // Valida se o status buscado na URL é um dos permitidos
-        if (!in_array($status, ['disponivel', 'vendido'])) {
-            abort(404);
-        }
-
-        $projetos = Projeto::where('status', $status)->get();
-        
-        return view('projetos.index', compact('projetos', 'status'));
     }
 }
