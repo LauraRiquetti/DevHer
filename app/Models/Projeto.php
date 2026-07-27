@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Projeto extends Model // 👈 Alterado de Equipamento para Projeto
+class Projeto extends Model
 {
     use HasFactory;
     
@@ -13,8 +13,7 @@ class Projeto extends Model // 👈 Alterado de Equipamento para Projeto
 
     protected $fillable = [
         'nome',
-        'preco',       // 👈 Note que no Model está 'preco', mas no seeder você usou 'valor'
-        'quantidade',  // 👈 Adicionado para o Seeder funcionar
+        'preco',
         'descricao',
         'status',
         'imagem',

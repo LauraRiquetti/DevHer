@@ -17,16 +17,21 @@
         <div class="card">
 
             @if ($errors->any())
-                <div class="alert alert-error">{{ $errors->first() }}</div>
+                <div class="alert alert-error" style="color: #721c24; background-color: #f8d7da; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+                    {{ $errors->first() }}
+                </div>
             @endif
 
-            {{-- RF02: título, descrição, categoria, preço e arquivos --}}
-            <form method="POST" action="{{ route('projetos.store') ?? '#' }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('projetos.store') }}" enctype="multipart/form-data">
                 @csrf
 
+                {{-- Definindo o status inicial como 'disponivel' por padrão --}}
+                <input type="hidden" name="status" value="disponivel">
+
                 <div class="field">
-                    <label for="titulo">Título do projeto</label>
-                    <input type="text" name="titulo" id="titulo" placeholder="Ex: Dashboard financeiro em React" value="{{ old('titulo') }}" required>
+                    <label for="nome">Título do projeto</label>
+                    {{-- Alterado name="titulo" para name="nome" --}}
+                    <input type="text" name="nome" id="nome" placeholder="Ex: Dashboard financeiro em React" value="{{ old('nome') }}" required>
                 </div>
 
                 <div class="field">
@@ -34,36 +39,25 @@
                     <textarea name="descricao" id="descricao" placeholder="Conte do que se trata o projeto, tecnologias usadas e o que está incluso.">{{ old('descricao') }}</textarea>
                 </div>
 
-                <div class="field-row">
-                    <div class="field">
-                        <label for="categoria">Categoria</label>
-                        <select name="categoria" id="categoria" required>
-                            <option value="">Selecione</option>
-                            <option value="Front-end">Front-end</option>
-                            <option value="Back-end">Back-end</option>
-                            <option value="UX/UI">UX/UI</option>
-                            <option value="Dados">Dados</option>
-                            <option value="Segurança">Segurança</option>
-                            <option value="Mobile">Mobile</option>
-                        </select>
-                    </div>
-                    <div class="field">
+                <div class="field-row" style="display: flex; gap: 16px;">
+                    <div class="field" style="flex: 1;">
                         <label for="preco">Preço (R$)</label>
                         <input type="number" step="0.01" min="0" name="preco" id="preco" placeholder="0,00" value="{{ old('preco') }}" required>
                     </div>
                 </div>
 
-                <div class="field">
-                    <label for="arquivos">Arquivos do projeto</label>
-                    <input type="file" name="arquivos[]" id="arquivos" multiple>
+                <div class="field" style="margin-top: 16px;">
+                    <label for="imagem_file">Imagem de capa do projeto</label>
+                    {{-- Ajustado para enviar arquivo de Imagem individual --}}
+                    <input type="file" name="imagem_file" id="imagem_file" accept="image/*">
                     <small style="color:var(--muted-2);font-size:12px;display:block;margin-top:6px;">
-                        Aceita .zip, .rar, imagens ou PDFs de documentação.
+                        Envie uma captura de tela ou capa representativa (.jpg, .png, .webp).
                     </small>
                 </div>
 
-                <div style="display:flex;gap:12px;margin-top:8px;">
+                <div style="display:flex;gap:12px;margin-top:24px;">
                     <button type="submit" class="btn btn-primary">Publicar projeto</button>
-                    <a href="{{ route('projetos.index') ?? '#' }}" class="btn btn-ghost">Cancelar</a>
+                    <a href="{{ route('projetos.index') }}" class="btn btn-ghost">Cancelar</a>
                 </div>
             </form>
         </div>

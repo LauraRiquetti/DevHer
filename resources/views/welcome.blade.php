@@ -103,25 +103,39 @@
         <div class="feature-copy reveal">
             <span class="eyebrow">Cursos e mentorias</span>
             <h2>Aprenda no seu ritmo, com quem já passou pelo caminho.</h2>
-            <p>Video-aulas, workshops e mentorias publicadas por criadoras da própria comunidade. Cursos com temas sensíveis exigem confirmação de maioridade, verificada pela data de nascimento no cadastro.</p>
+            <p>Video-aulas, workshops e mentorias publicadas por criadoras da própria comunidade.</p>
             <div class="feature-tags">
                 <span class="tag">VÍDEO-AULAS</span>
                 <span class="tag">MENTORIAS AO VIVO</span>
-                <span class="tag">VERIFICAÇÃO DE IDADE</span>
             </div>
         </div>
         <div class="mock reveal">
             <div class="mock-bar"><span></span><span></span><span></span></div>
             <div class="mock-title">cursos / recomendados para você</div>
-            <div class="course-row">
-                <div class="course-thumb">01</div>
-                <div><h4>Lógica de programação do zero</h4><span>Gratuito · 4h</span></div>
-            </div>
-            <div class="course-row">
-                <div class="course-thumb">02</div>
-                <div><h4>Segurança ofensiva na prática</h4><span>R$ 149,00 · 8h</span></div>
-                <span class="badge-18">18+</span>
-            </div>
+            
+            {{-- Loop Dinâmico de Cursos --}}
+            @forelse($cursos->take(3) as $key => $curso)
+                <div class="course-row">
+                    <div class="course-thumb">0{{ $key + 1 }}</div>
+                    <div>
+                        <h4>{{ $curso->titulo ?? $curso->nome }}</h4>
+                        <span>
+                            @if(($curso->preco ?? 0) == 0)
+                                Gratuito
+                            @else
+                                R$ {{ number_format($curso->preco, 2, ',', '.') }}
+                            @endif
+                            · {{ $curso->duracao ?? 'Carga horária N/A' }}
+                        </span>
+                    </div>
+                    @if(isset($curso->is_18plus) && $curso->is_18plus)
+                        <span class="badge-18">18+</span>
+                    @endif
+                </div>
+            @empty
+                <p style="color: var(--muted); padding: 16px;">Nenhum curso cadastrado no momento.</p>
+            @endforelse
+
         </div>
     </div>
 </section>
@@ -153,43 +167,43 @@
     </div>
 </section>
 
-<section class="planos" id="planos">
+<section class="planos" id="jornada">
     <div class="wrap">
         <div class="planos-head reveal">
-            <span class="eyebrow">Planos</span>
-            <h2>Escolha como você quer participar.</h2>
+            <span class="eyebrow">Comece agora</span>
+            <h2>Sua jornada como desenvolvedora começa aqui.</h2>
+            <p style="color: var(--muted); max-width: 600px; margin: 12px auto 0; font-size: 1.1rem; line-height: 1.6;">
+                Tudo o que você precisa para aprender, construir um portfólio de impacto e rentabilizar seus projetos em uma comunidade feita por e para mulheres na TI.
+            </p>
         </div>
-        <div class="plans-grid">
+        
+        <div class="plans-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
             <div class="plan reveal">
-                <h3>Estudante</h3>
-                <div class="sub">Para começar a aprender</div>
-                <ul>
-                    <li>Acesso a cursos gratuitos</li>
-                    <li>Perfil público básico</li>
-                    <li>Participação em grupos e eventos</li>
-                </ul>
-                <a href="{{ route('cadastro') ?? '#' }}" class="btn btn-ghost btn-block">Criar conta grátis</a>
+                <h3>01. Aprenda</h3>
+                <div class="sub">Desenvolva novas habilidades</div>
+                <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 20px;">
+                    Acesse cursos, workshops e mentorias práticas ministradas por outras mulheres da área da tecnologia.
+                </p>
+                <a href="#cursos" class="btn btn-ghost btn-block">Explorar cursos</a>
             </div>
+
             <div class="plan featured reveal">
-                <span class="pill">Mais popular</span>
-                <h3>Criadora</h3>
-                <div class="sub">Para publicar e vender</div>
-                <ul>
-                    <li>Tudo do plano Estudante</li>
-                    <li>Publicação de projetos e cursos</li>
-                    <li>Checkout e pagamento integrado</li>
-                </ul>
-                <a href="{{ route('cadastro') ?? '#' }}" class="btn btn-primary btn-block">Quero ser criadora</a>
+                <span class="pill">Comunidade</span>
+                <h3>02. Conecte-se</h3>
+                <div class="sub">Faça parte do ecossistema</div>
+                <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 20px;">
+                    Troque experiências, encontre parcerias para projetos e fortaleça sua rede de contatos na área de TI.
+                </p>
+                <a href="{{ route('cadastro') }}" class="btn btn-primary btn-block">Criar minha conta</a>
             </div>
+
             <div class="plan reveal">
-                <h3>Empresa parceira</h3>
-                <div class="sub">Para apoiar e contratar</div>
-                <ul>
-                    <li>Mural de vagas e estágios</li>
-                    <li>Patrocínio de mentorias</li>
-                    <li>Selo de empresa parceira ESG</li>
-                </ul>
-                <a href="#" class="btn btn-ghost btn-block">Falar com o time</a>
+                <h3>03. Rentabilize</h3>
+                <div class="sub">Venda seus projetos</div>
+                <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 20px;">
+                    Publique seus scripts, sistemas e componentes no marketplace e transforme seu conhecimento em renda real.
+                </p>
+                <a href="#marketplace" class="btn btn-ghost btn-block">Ver marketplace</a>
             </div>
         </div>
     </div>

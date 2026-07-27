@@ -4,6 +4,11 @@
 
 @section('content')
 <section class="hero" style="padding:0;">
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
     <div class="glow glow-1"></div>
     <div class="auth-wrap">
         <div class="form-card reveal in">

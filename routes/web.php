@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VendedoraController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProjetoController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CursoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,9 +14,7 @@ use App\Http\Controllers\AuthController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // ==========================================
 // FLUXO DE AUTENTICAÇÃO CENTRALIZADO (AuthController)
@@ -56,8 +57,11 @@ Route::get('/cep/{cep}', [VendedoraController::class, 'buscarCep'])->name('cep.b
 // ==========================================
 
 // Marketplace de projetos
-Route::view('/projetos', 'Projetos.index')->name('projetos.index');
-Route::view('/projetos/novo', 'Projetos.create')->name('projetos.create');
+Route::get('/projetos', [ProjetoController::class, 'index'])->name('projetos.index');
+Route::get('/projetos/novo', [ProjetoController::class, 'create'])->name('projetos.create');
+Route::post('/projetos', [ProjetoController::class, 'store'])->name('projetos.store');
+Route::put('/projetos/{projeto}', [ProjetoController::class, 'update'])->name('projetos.update');
+Route::delete('/projetos/{projeto}', [ProjetoController::class, 'destroy'])->name('projetos.destroy');
 
 // Carrinho e checkout
 Route::post('/carrinho', function () { return back(); })->name('carrinho.add');
@@ -68,8 +72,9 @@ Route::view('/carrinho/sucesso', 'Carrinho.sucesso')->name('carrinho.sucesso');
 Route::view('/meus-pedidos', 'Loja.meus_pedidos')->name('meus-pedidos');
 
 // Cursos
-Route::view('/cursos', 'Cursos.index')->name('cursos.index');
-
+Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
+Route::get('/cursos/novo', [CursoController::class, 'create'])->name('cursos.create');
+Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.store');
 
 // ==========================================
 // PAINEL ADMINISTRATIVO (Admin)

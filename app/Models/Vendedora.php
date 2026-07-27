@@ -12,11 +12,13 @@ class Vendedora extends Authenticatable
 
     protected $table = 'vendedoras';
 
-    protected $fillable = [
+   protected $fillable = [
         'user_id',
         'nome',
         'email',
         'password',
+        'CPF',
+        'telefone', // <-- ADICIONE ESTA LINHA
         'data_nascimento',
         'CEP',
         'rua',
@@ -24,7 +26,7 @@ class Vendedora extends Authenticatable
         'cidade',
         'estado',
         'numero',
-        'role' 
+        'role',
     ];
     protected $hidden = [
         'password',

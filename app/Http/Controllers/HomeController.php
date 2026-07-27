@@ -3,21 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Projeto; // Importa o model de Projetos
-use App\Models\Curso;   // Importa o model de Cursos
+use App\Models\Projeto;
+use App\Models\Curso;
+use App\Models\User;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // Busca os registros mais recentes de cada um
         $projetos = Projeto::orderByDesc('id')->get();
         $cursos   = Curso::orderByDesc('id')->get();
         
-        // Define 'todos' para manter a lógica de categoria que você já tinha
-        $categoria = 'todos'; 
+        // Dados para os contadores e a constelação da welcome
+        $vendedoras     = User::latest()->take(6)->get();
+        $totalProjetos  = Projeto::count();
+        $totalCriadoras = User::count();
 
-        // Passa as duas coleções para a view 'loja.home'
-        return view('loja.home', compact('projetos', 'cursos', 'categoria'));
+        // Altere 'loja.home' para 'welcome' para que os dados cheguem na landing page
+        return view('welcome', compact(
+            'projetos', 
+            'cursos', 
+            'vendedoras', 
+            'totalProjetos', 
+            'totalCriadoras'
+        ));
     }
 }

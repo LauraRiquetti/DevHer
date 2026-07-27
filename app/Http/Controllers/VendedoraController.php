@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Vendedora;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
@@ -11,16 +13,15 @@ class VendedoraController extends Controller
 {
     public function buscarCep($cep)
     {
-        $response = Http::get("https://viacep.com.br/ws/$cep/json/");
+        $cepLimpo = preg_replace('/[^0-9]/', '', $cep);
+        $response = Http::get("https://viacep.com.br/ws/{$cepLimpo}/json/");
 
-        $dados = $response->json();
-
-        return response()->json($dados);
+        return response()->json($response->json());
     }
 
     public function index()
     {
-        $vendedoras = Vendedora::orderByDesc('id')->get();
+        $vendedoras = Vendedora::with('user')->orderByDesc('id')->get();
 
         return view('vendedoras.index', compact('vendedoras'));
     }
@@ -32,128 +33,121 @@ class VendedoraController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nome' => 'required|string',
-            'email' => 'required|email|unique:vendedoras,email',
-            'password' => 'required|min:6',
+        $validated = $request->validate([
+            'nome'            => 'required|string|max:255',
+            'email'           => 'required|email|unique:users,email|unique:vendedoras,email',
+            'password'        => 'required|min:8',
+            'CPF'             => 'required|string',
+            'telefone'        => 'required|string',
             'data_nascimento' => 'required|date',
-            'CEP' => 'required',
-            'rua' => 'required|string',
-            'bairro' => 'required|string',
-            'cidade' => 'required|string',
-            'estado' => 'required|string',
-            'numero' => 'required',
+            'CEP'             => 'required|string',
+            'rua'             => 'required|string',
+            'bairro'          => 'required|string',
+            'cidade'          => 'required|string',
+            'estado'          => 'required|string|max:2',
+            'numero'          => 'required|numeric',
         ]);
 
-        Vendedora::create([
-            'nome' => $request->nome,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'data_nascimento' => $request->data_nascimento,
-            'CEP' => $request->CEP,
-            'rua' => $request->rua,
-            'bairro' => $request->bairro,
-            'cidade' => $request->cidade,
-            'estado' => $request->estado,
-            'numero' => $request->numero,
-        ]);
+        $cpfLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CPF']);
+        $cepLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CEP']);
 
-        return redirect('/login')->with('success', 'Conta criada! Agora faça login.');
-    }
+        // Transação para manter integridade
+        DB::transaction(function () use ($validated, $cpfLimpo, $cepLimpo) {
+            $user = User::create([
+                'name'     => $validated['nome'],
+                'email'    => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role'     => 'vendedora',
+            ]);
 
-    /**
-     * Mostra o formulário de login.
-     */
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
+            Vendedora::create([
+                'user_id'         => $user->id,
+                'nome'            => $validated['nome'],
+                'email'           => $validated['email'],
+                'password'        => Hash::make($validated['password']),
+                'CPF'             => $cpfLimpo,
+                'telefone'        => $validated['telefone'],
+                'data_nascimento' => $validated['data_nascimento'],
+                'CEP'             => $cepLimpo,
+                'rua'             => $validated['rua'],
+                'bairro'          => $validated['bairro'],
+                'cidade'          => $validated['cidade'],
+                'estado'          => strtoupper($validated['estado']),
+                'numero'          => (int) $validated['numero'],
+                'role'            => 'vendedora',
+            ]);
+        });
 
-    /**
-     * Processa o login (sem usar o sistema de Auth padrão do Laravel,
-     * já que o model Vendedora não é um "users" nativo).
-     */
-    public function login(Request $request)
-    {
-        $credenciais = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $vendedora = Vendedora::where('email', $credenciais['email'])->first();
-
-        if (!$vendedora || !Hash::check($credenciais['password'], $vendedora->password)) {
-            return back()
-                ->withErrors(['email' => 'E-mail ou senha inválidos.'])
-                ->onlyInput('email');
-        }
-
-        // Guarda os dados da vendedora logada na sessão
-        session([
-            'vendedora_id' => $vendedora->id,
-            'vendedora_nome' => $vendedora->nome,
-            'vendedora_email' => $vendedora->email,
-        ]);
-
-        $request->session()->regenerate();
-
-        return redirect('/')->with('success', 'Login realizado com sucesso!');
-    }
-
-    /**
-     * Faz logout limpando a sessão da vendedora.
-     */
-    public function logout(Request $request)
-    {
-        $request->session()->forget(['vendedora_id', 'vendedora_nome', 'vendedora_email']);
-        $request->session()->regenerate();
-
-        return redirect('/login');
+        return redirect('/login')->with('success', 'Conta de criadora criada! Agora faça login.');
     }
 
     public function update(Request $request, Vendedora $vendedora)
     {
-        $rules = [
-            'nome'            => 'required|string',
+        $validated = $request->validate([
+            'nome'            => 'required|string|max:255',
             'email'           => 'required|email|unique:vendedoras,email,' . $vendedora->id,
+            'CPF'             => 'required|string',
+            'telefone'        => 'required|string',
             'data_nascimento' => 'required|date',
-            'CEP'             => 'required',
+            'CEP'             => 'required|string',
             'rua'             => 'required|string',
             'bairro'          => 'required|string',
             'cidade'          => 'required|string',
-            'estado'          => 'required|string',
-            'numero'          => 'required',
-            'password'        => 'nullable|min:6',
-        ];
+            'estado'          => 'required|string|max:2',
+            'numero'          => 'required|numeric',
+            'password'        => 'nullable|min:8',
+        ]);
 
-        $validated = $request->validate($rules);
+        $cpfLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CPF']);
+        $cepLimpo = (int) preg_replace('/[^0-9]/', '', $validated['CEP']);
 
-        $dados = [
-            'nome'            => $validated['nome'],
-            'email'           => $validated['email'],
-            'data_nascimento' => $validated['data_nascimento'],
-            'CEP'             => $validated['CEP'],
-            'rua'             => $validated['rua'],
-            'bairro'          => $validated['bairro'],
-            'cidade'          => $validated['cidade'],
-            'estado'          => $validated['estado'],
-            'numero'          => $validated['numero'],
-        ];
+        DB::transaction(function () use ($request, $vendedora, $validated, $cpfLimpo, $cepLimpo) {
+            $dadosVendedora = [
+                'nome'            => $validated['nome'],
+                'email'           => $validated['email'],
+                'CPF'             => $cpfLimpo,
+                'telefone'        => $validated['telefone'],
+                'data_nascimento' => $validated['data_nascimento'],
+                'CEP'             => $cepLimpo,
+                'rua'             => $validated['rua'],
+                'bairro'          => $validated['bairro'],
+                'cidade'          => $validated['cidade'],
+                'estado'          => strtoupper($validated['estado']),
+                'numero'          => (int) $validated['numero'],
+            ];
 
-        // Só adiciona a senha se o usuário digitou algo
-        if ($request->filled('password')) {
-            $dados['password'] = Hash::make($request->password);
-        }
+            if ($request->filled('password')) {
+                $dadosVendedora['password'] = Hash::make($request->password);
+            }
 
-        // Salva tudo de uma vez
-        $vendedora->update($dados);
+            $vendedora->update($dadosVendedora);
 
-        return redirect()->route('vendedoras.index')->with('success', 'Perfil atualizado!');
+            // Sincroniza dados na tabela principal 'users'
+            if ($vendedora->user) {
+                $dadosUser = [
+                    'name'  => $validated['nome'],
+                    'email' => $validated['email'],
+                ];
+                if ($request->filled('password')) {
+                    $dadosUser['password'] = Hash::make($request->password);
+                }
+                $vendedora->user->update($dadosUser);
+            }
+        });
+
+        return redirect()->route('vendedoras.index')->with('success', 'Perfil da vendedora atualizado!');
     }
 
     public function destroy(Vendedora $vendedora)
     {
-        $vendedora->delete();
-        return redirect()->route('vendedoras.index');
+        DB::transaction(function () use ($vendedora) {
+            if ($vendedora->user) {
+                $vendedora->user->delete(); // Apaga o User e ativa deleção em cascata
+            } else {
+                $vendedora->delete();
+            }
+        });
+
+        return redirect()->route('vendedoras.index')->with('success', 'Vendedora removida com sucesso!');
     }
 }
