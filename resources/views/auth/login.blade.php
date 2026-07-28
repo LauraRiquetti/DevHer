@@ -33,7 +33,15 @@
 
                 <div class="field">
                     <label for="password">Senha</label>
-                    <input type="password" name="password" id="password" placeholder="••••••••" required>
+                    <div style="position: relative;">
+                        <!-- Adicionado padding-right para o texto não encostar no ícone -->
+                        <input type="password" name="password" id="password" placeholder="••••••••" required style="padding-right: 40px; width: 100%;">
+                        
+                        <!-- Botão com o ícone -->
+                        <button type="button" onclick="togglePassword('password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: var(--muted-2); padding: 0; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-toggle-off" style="font-size: 1.2rem;"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">

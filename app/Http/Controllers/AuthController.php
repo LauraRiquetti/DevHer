@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -164,5 +165,38 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['email' => 'Não foi possível enviar o e-mail. Tente novamente.']);
+    }
+    /**
+     * Processa a redefinição de senha
+     */
+    public function updatePassword(Request $request)
+    {
+        // 1. Valida os dados enviados (como no seu form não tem "confirmar senha", validamos apenas a senha)
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8', 
+        ]);
+
+        // 2. Tenta redefinir a senha
+        $status = Password::reset(
+            $request->only('email', 'password', 'token'),
+            function ($user, string $password) {
+                // Altera a senha criptografando com Hash
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+            }
+        );
+
+        // 3. Verifica se deu certo e redireciona
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Sua senha foi redefinida com sucesso! Faça login para continuar.');
+        }
+
+        // Se falhar (ex: token expirado), volta com erro
+        return back()->withErrors(['email' => __($status)]);
     }
 }

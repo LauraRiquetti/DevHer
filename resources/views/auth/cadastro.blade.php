@@ -65,14 +65,25 @@
                     </div>
                 </div>
 
+                {{-- Campos de Senha Modificados --}}
                 <div class="field-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                     <div class="field">
                         <label for="password">Senha *</label>
-                        <input type="password" name="password" id="password" placeholder="Mínimo 8 caracteres" required>
+                        <div style="position: relative;">
+                            <input type="password" name="password" id="password" placeholder="Mínimo 8 caracteres" required style="padding-right: 40px; width: 100%;">
+                            <button type="button" onclick="togglePassword('password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: var(--muted-2); padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-toggle-off" style="font-size: 1.2rem;"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="field">
                         <label for="password_confirmation">Confirmar senha *</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Repita a senha" required>
+                        <div style="position: relative;">
+                            <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Repita a senha" required style="padding-right: 40px; width: 100%;">
+                            <button type="button" onclick="togglePassword('password_confirmation', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: var(--muted-2); padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-toggle-off" style="font-size: 1.2rem;"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
