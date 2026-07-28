@@ -10,7 +10,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
-            ProjetoSeeder::class, // Mantém o dos produtos que fizemos antes!
         ]);
     }
 }

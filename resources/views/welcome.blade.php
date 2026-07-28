@@ -12,11 +12,19 @@
         <h1>Aprenda, conecte-se e <span class="accent">venda seus projetos</span> em tecnologia.</h1>
         <p>Cursos, mentorias, portfólio e uma comunidade real de mulheres na TI — em um único ecossistema pensado para reduzir a evasão feminina e abrir portas no mercado.</p>
         <div class="hero-ctas">
-            <a href="{{ route('cadastro') ?? '#' }}" class="btn btn-primary">Comece grátis</a>
+            @auth
+                {{-- Exibe O BOTÃO SOMENTE se for Admin --}}
+                @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Acessar Painel Admin</a>
+                @endif
+            @else
+                <a href="{{ route('cadastro') }}" class="btn btn-primary">Comece grátis</a>
+            @endauth
             <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
         </div>
     </div>
 
+    {{-- Constelação Dinâmica com usuárias do Banco --}}
     <div class="wrap">
         <div class="constellation reveal">
             <svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg">
@@ -50,11 +58,27 @@
                     <circle cx="720" cy="60" r="5" fill="url(#nodeGrad)"/>
                 </g>
                 <g class="node-label">
-                    <text x="330" y="130">@mariana.dev</text>
-                    <text x="470" y="245">@ana.backend</text>
-                    <text x="650" y="185">@lu.uxui</text>
-                    <text x="150" y="75">@bia.data</text>
-                    <text x="800" y="95">@carol.sec</text>
+                    @php
+                        $coordenadas = [
+                            ['x' => 330, 'y' => 130],
+                            ['x' => 470, 'y' => 245],
+                            ['x' => 650, 'y' => 185],
+                            ['x' => 150, 'y' => 75],
+                            ['x' => 800, 'y' => 95],
+                            ['x' => 230, 'y' => 280],
+                        ];
+                    @endphp
+                    @forelse($vendedoras as $idx => $vendedora)
+                        @if(isset($coordenadas[$idx]))
+                            <text x="{{ $coordenadas[$idx]['x'] }}" y="{{ $coordenadas[$idx]['y'] }}">
+                                @ {{ Str::slug($vendedora->name ?? $vendedora->nome ?? 'desenvolvedora') }}
+                            </text>
+                        @endif
+                    @empty
+                        <text x="330" y="130">@mariana.dev</text>
+                        <text x="470" y="245">@ana.backend</text>
+                        <text x="650" y="185">@lu.uxui</text>
+                    @endforelse
                 </g>
             </svg>
         </div>
@@ -75,6 +99,7 @@
     </div>
 </section>
 
+{{-- Seção de Marketplace --}}
 <section class="feature" id="marketplace">
     <div class="wrap">
         <div class="feature-copy reveal">
@@ -91,13 +116,27 @@
             <div class="mock-bar"><span></span><span></span><span></span></div>
             <div class="mock-title">marketplace / projetos em alta</div>
             <div class="proj-grid">
-                <div class="proj-card"><div class="proj-thumb"></div><h4>Dashboard financeiro em React</h4><span class="price">R$ 89,00</span></div>
-                <div class="proj-card"><div class="proj-thumb"></div><h4>API de agendamento em Node</h4><span class="price">R$ 120,00</span></div>
+                @forelse($projetos->take(2) as $projeto)
+                    <div class="proj-card">
+                        <div class="proj-thumb"></div>
+                        <h4>{{ $projeto->titulo ?? $projeto->nome }}</h4>
+                        <span class="price">
+                            R$ {{ number_format($projeto->preco ?? $projeto->valor ?? 0, 2, ',', '.') }}
+                        </span>
+                    </div>
+                @empty
+                    <div class="proj-card">
+                        <div class="proj-thumb"></div>
+                        <h4>Nenhum projeto cadastrado</h4>
+                        <span class="price">R$ 0,00</span>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>
 </section>
 
+{{-- Seção de Cursos e Mentorias --}}
 <section class="feature reverse" id="cursos">
     <div class="wrap">
         <div class="feature-copy reveal">
@@ -113,7 +152,6 @@
             <div class="mock-bar"><span></span><span></span><span></span></div>
             <div class="mock-title">cursos / recomendados para você</div>
             
-            {{-- Loop Dinâmico de Cursos --}}
             @forelse($cursos->take(3) as $key => $curso)
                 <div class="course-row">
                     <div class="course-thumb">0{{ $key + 1 }}</div>
@@ -140,14 +178,27 @@
     </div>
 </section>
 
+{{-- Estatísticas Reais --}}
 <section class="stats">
     <div class="wrap">
         <h2 class="reveal">Cada número representa uma trajetória que continuou.</h2>
         <div class="stats-grid">
-            <div class="reveal"><div class="stat-num" data-count="18">0</div><div class="stat-label">representatividade feminina na TI hoje*</div></div>
-            <div class="reveal"><div class="stat-num" data-count="10">0</div><div class="stat-label">a menos de evasão com apoio contínuo*</div></div>
-            <div class="reveal"><div class="stat-num" data-count="24">0</div><div class="stat-label">horas de conteúdo publicado por semana</div></div>
-            <div class="reveal"><div class="stat-num" data-count="5">0</div><div class="stat-label">a 10% de taxa sobre vendas na plataforma</div></div>
+            <div class="reveal">
+                <div class="stat-num" data-count="{{ $totalCriadoras > 0 ? $totalCriadoras : 18 }}">{{ $totalCriadoras }}</div>
+                <div class="stat-label">criadoras cadastradas na plataforma</div>
+            </div>
+            <div class="reveal">
+                <div class="stat-num" data-count="{{ $totalProjetos > 0 ? $totalProjetos : 10 }}">{{ $totalProjetos }}</div>
+                <div class="stat-label">projetos ativos no marketplace</div>
+            </div>
+            <div class="reveal">
+                <div class="stat-static" style="font-size: var(--stat-size, 3rem); font-weight: 800; color: var(--pink-main, #ff2d87);">24h</div>
+                <div class="stat-label">de conteúdo disponível</div>
+            </div>
+            <div class="reveal">
+                <div class="stat-num" data-count="5">5</div>
+                <div class="stat-label">de taxa sobre vendas no ecossistema</div>
+            </div>
         </div>
     </div>
 </section>
@@ -184,7 +235,7 @@
                 <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 20px;">
                     Acesse cursos, workshops e mentorias práticas ministradas por outras mulheres da área da tecnologia.
                 </p>
-                <a href="#cursos" class="btn btn-ghost btn-block">Explorar cursos</a>
+                <a href="{{ route('cursos.index') }}" class="btn btn-ghost btn-block">Explorar cursos</a>
             </div>
 
             <div class="plan featured reveal">
@@ -194,7 +245,13 @@
                 <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 20px;">
                     Troque experiências, encontre parcerias para projetos e fortaleça sua rede de contatos na área de TI.
                 </p>
-                <a href="{{ route('cadastro') }}" class="btn btn-primary btn-block">Criar minha conta</a>
+                @auth
+                    @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
+                        <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-block">Acessar Painel Admin</a>
+                    @endif
+                @else
+                    <a href="{{ route('cadastro') }}" class="btn btn-primary btn-block">Criar minha conta</a>
+                @endauth
             </div>
 
             <div class="plan reveal">
@@ -203,7 +260,7 @@
                 <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 20px;">
                     Publique seus scripts, sistemas e componentes no marketplace e transforme seu conhecimento em renda real.
                 </p>
-                <a href="#marketplace" class="btn btn-ghost btn-block">Ver marketplace</a>
+                <a href="{{ route('projetos.index') }}" class="btn btn-ghost btn-block">Ver marketplace</a>
             </div>
         </div>
     </div>
@@ -214,7 +271,13 @@
     <div class="wrap">
         <h2 class="reveal">Sua trajetória na tecnologia não precisa continuar sozinha.</h2>
         <p class="reveal">Cadastre-se em minutos e comece a aprender, construir e vender hoje mesmo.</p>
-        <a href="{{ route('cadastro') ?? '#' }}" class="btn btn-primary reveal">Criar minha conta</a>
+        @auth
+            @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-primary reveal">Acessar Painel Admin</a>
+            @endif
+        @else
+            <a href="{{ route('cadastro') }}" class="btn btn-primary reveal">Criar minha conta</a>
+        @endauth
     </div>
 </section>
 

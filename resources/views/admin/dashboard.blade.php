@@ -4,20 +4,6 @@
 
 @section('content')
 
-@php
-    $kpis = $kpis ?? [
-        ['label' => 'Usuárias ativas', 'valor' => '1.284', 'delta' => '+8,2%', 'up' => true],
-        ['label' => 'Projetos publicados', 'valor' => '312', 'delta' => '+4,1%', 'up' => true],
-        ['label' => 'Cursos publicados', 'valor' => '96', 'delta' => '+1,5%', 'up' => true],
-        ['label' => 'Vendas no mês', 'valor' => 'R$ 18.430', 'delta' => '-2,3%', 'up' => false],
-    ];
-    $pendencias = $pendencias ?? [
-        ['tipo' => 'Projeto', 'titulo' => 'Bot de análise de dados', 'autora' => 'Bianca Silva'],
-        ['tipo' => 'Curso', 'titulo' => 'Introdução a redes', 'autora' => 'Juliana Prado'],
-        ['tipo' => 'Comentário', 'titulo' => 'Denúncia de conteúdo', 'autora' => 'Anônimo'],
-    ];
-@endphp
-
 <section class="page-head">
     <div class="wrap">
         <span class="eyebrow">Painel administrativo</span>
@@ -28,6 +14,12 @@
 
 <section style="padding:48px 0 100px;">
     <div class="wrap">
+
+        @if(session('success'))
+            <div class="alert alert-success mb-4" style="padding:15px; background-color:#d4edda; color:#155724; border-radius:8px;">
+                {{ session('success') }}
+            </div>
+        @endif
 
         <div class="kpi-grid">
             @foreach ($kpis as $kpi)
@@ -41,7 +33,7 @@
 
         <div class="panel-title">
             <h3>Conteúdos aguardando aprovação</h3>
-            <a href="{{ route('admin.relatorio') ?? '#' }}" class="btn btn-ghost btn-sm">Ver relatório completo</a>
+            <a href="{{ route('admin.relatorio') }}" class="btn btn-ghost btn-sm">Ver relatório completo</a>
         </div>
 
         <div class="table-wrap">
@@ -62,12 +54,11 @@
                             <td>{{ $item['autora'] }}</td>
                             <td>
                                 <div class="table-actions">
-                                    <form method="POST" action="{{ route('admin.aprovar', $item['id'] ?? 1) ?? '#' }}">
+                                    <form method="POST" action="{{ route('admin.aprovar', $item['id']) }}">
                                         @csrf
                                         <button type="submit" class="btn btn-primary btn-sm">Aprovar</button>
                                     </form>
-                                    <form method="POST" action="{{ route('admin.remover', $item['id'] ?? 1) ?? '#' }}"
-                                          data-confirm="Remover este conteúdo?">
+                                    <form method="POST" action="{{ route('admin.remover', $item['id']) }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm">Remover</button>
@@ -76,7 +67,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" style="color:var(--muted);">Nenhum conteúdo pendente. 🎉</td></tr>
+                        <tr><td colspan="4" style="color:var(--muted); text-align:center;">Nenhum conteúdo pendente. 🎉</td></tr>
                     @endforelse
                 </tbody>
             </table>
