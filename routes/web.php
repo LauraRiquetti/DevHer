@@ -91,7 +91,9 @@ Route::middleware(['auth'])->group(function () {
 // O "prefix" adiciona '/admin' na URL. O "name" adiciona 'admin.' no nome da rota.
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    // Voltamos para '/' para que a URL seja exatamente '/admin' e não quebre o AuthController
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    
     Route::get('/relatorio', [AdminController::class, 'relatorio'])->name('relatorio');
     Route::post('/aprovar/{id}', [AdminController::class, 'aprovar'])->name('aprovar');
     Route::delete('/remover/{id}', [AdminController::class, 'remover'])->name('remover');
