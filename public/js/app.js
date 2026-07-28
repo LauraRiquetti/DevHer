@@ -55,3 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+// Mostrar/Ocultar Senha (com ícones do Bootstrap)
+window.togglePassword = function(inputId, buttonInfo) {
+    const input = document.getElementById(inputId);
+    const icon = buttonInfo.querySelector('i'); // Agora pega a tag <i>
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-toggle-on'; // Ícone ligado (mostrando)
+        icon.style.color = 'var(--pink-light)'; // Dá um destaque na cor quando ativo
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-toggle-off'; // Ícone desligado (oculto)
+        icon.style.color = 'inherit'; // Volta a cor normal
+    }
+};

@@ -30,6 +30,7 @@ Route::post('/cadastro', [AuthController::class, 'register'])->name('cadastro.st
 // Recuperação de senha via E-mail (Gmail)
 Route::get('/esqueci-senha', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('/esqueci-senha', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('/redefinir-senha', [App\Http\Controllers\AuthController::class, 'updatePassword'])->name('password.update');
 Route::view('/redefinir-senha/{token}', 'auth.reset-password')->name('password.reset');
 
 // Catálogos e Vitrines
