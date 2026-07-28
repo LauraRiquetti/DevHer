@@ -41,8 +41,8 @@ class AuthController extends Controller
                 return redirect()->intended('/admin'); // <-- Corrigido para /admin
             }
 
-            // Se for cliente comum, vai para a loja
-            return redirect()->intended('/home');
+            // REDIRECIONA PARA A TELA INICIAL (WELCOME)
+            return redirect()->intended(route('home'))->with('success', 'Bem-vinda de volta!');
         }
 
         return back()->withErrors([
