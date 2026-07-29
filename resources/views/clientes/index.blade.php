@@ -1,17 +1,10 @@
+{{-- Estende o layout principal da aplicação --}}
 @extends('layouts.app')
 
+{{-- Nome do título da página --}}
 @section('title', 'Usuários')
 
 @section('content')
-
-@php
-    $usuarios = $usuarios ?? [
-        ['nome' => 'Mariana Costa', 'email' => 'mariana@email.com', 'tipo' => 'Criadora', 'status' => 'ativo'],
-        ['nome' => 'Fernanda Alves', 'email' => 'fernanda@email.com', 'tipo' => 'Cliente', 'status' => 'ativo'],
-        ['nome' => 'Juliana Prado', 'email' => 'juliana@email.com', 'tipo' => 'Criadora', 'status' => 'pendente'],
-        ['nome' => 'Renata Souza', 'email' => 'renata@email.com', 'tipo' => 'Cliente', 'status' => 'bloqueado'],
-    ];
-@endphp
 
 <section class="page-head">
     <div class="wrap">
@@ -23,9 +16,23 @@
 
 <section style="padding:48px 0 100px;">
     <div class="wrap">
-        <div class="table-toolbar">
-            <input type="text" placeholder="Buscar por nome ou e-mail...">
-            <a href="{{ route('usuarios.create') ?? '#' }}" class="btn btn-primary btn-sm">+ Novo usuário</a>
+        
+        <!-- Toolbar com o formulário de busca REAL -->
+        <div class="table-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            
+            {{-- Formulário de pesquisa disparando um GET para a própria página --}}
+            <form action="{{ route('usuarios.index') }}" method="GET" style="display: flex; gap: 8px; width: 100%; max-width: 400px;">
+                <!-- O request('search') mantém o termo pesquisado na barra após recarregar -->
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por nome ou e-mail..." style="width: 100%;">
+                <button type="submit" class="btn btn-primary btn-sm">Pesquisar</button>
+                
+                {{-- Botão de limpar busca (só aparece se houver algo pesquisado) --}}
+                @if(request('search'))
+                    <a href="{{ route('usuarios.index') }}" class="btn btn-ghost btn-sm">Limpar</a>
+                @endif
+            </form>
+
+            {{-- O botão de "Novo usuário" foi removido daqui conforme nossa nova regra de negócio! --}}
         </div>
 
         <div class="table-wrap">
@@ -40,21 +47,25 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {{-- O $usuarios agora vem direto do Controller (banco de dados) --}}
                     @forelse ($usuarios as $usuario)
                         <tr>
-                            <td>{{ $usuario['nome'] }}</td>
-                            <td>{{ $usuario['email'] }}</td>
-                            <td>{{ $usuario['tipo'] }}</td>
+                            {{-- Usando a sintaxe de objeto (->) pois agora é um Model do Eloquent --}}
+                            <td>{{ $usuario->name }}</td>
+                            <td>{{ $usuario->email }}</td>
+                            <td>{{ ucfirst($usuario->tipo_perfil) }}</td>
                             <td>
-                                <span class="status-pill status-{{ $usuario['status'] }}">
-                                    {{ ucfirst($usuario['status']) }}
+                                <span class="status-pill status-{{ $usuario->status }}">
+                                    {{ ucfirst($usuario->status) }}
                                 </span>
                             </td>
                             <td>
                                 <div class="table-actions">
-                                    <a href="{{ route('usuarios.edit', $usuario['id'] ?? 1) ?? '#' }}" class="btn btn-ghost btn-sm">Editar</a>
-                                    <form method="POST" action="{{ route('usuarios.destroy', $usuario['id'] ?? 1) ?? '#' }}"
-                                          data-confirm="Tem certeza que deseja remover este usuário?">
+                                    <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-ghost btn-sm">Editar</a>
+                                    
+                                    {{-- Formulário de exclusão real --}}
+                                    <form method="POST" action="{{ route('usuarios.destroy', $usuario->id) }}" 
+                                          onsubmit="return confirm('Tem certeza que deseja remover este usuário?');" style="display:inline-block;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm">Remover</button>
@@ -63,11 +74,22 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" style="color:var(--muted);">Nenhum usuário encontrado.</td></tr>
+                        <tr>
+                            {{-- Mensagem amigável caso a busca não retorne nada ou o banco esteja vazio --}}
+                            <td colspan="5" style="color:var(--muted); text-align:center; padding: 24px;">
+                                Nenhum usuário encontrado.
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        {{-- Exibe a paginação (ex: botões de Próxima Página / Página Anterior) --}}
+        <div style="margin-top: 24px; display: flex; justify-content: center;">
+            {{ $usuarios->withQueryString()->links() }}
+        </div>
+
     </div>
 </section>
 @endsection

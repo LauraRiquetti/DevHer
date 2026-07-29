@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+// Importação das Models necessárias para manipulação no banco de dados
 use App\Models\Cliente;
 use App\Models\User;
 use App\Models\Vendedora;
+
+// Importação das Facades e utilitários do Laravel
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +22,7 @@ class AuthController extends Controller
      */
     public function showLoginForm()
     {
+        // Retorna a view localizada em resources/views/auth/login.blade.php
         return view('auth.login');
     }
 
@@ -27,14 +31,18 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // Valida as credenciais recebidas da requisição (e-mail obrigatório e válido; senha obrigatória)
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
+        // Tenta autenticar o usuário no banco usando a Facade Auth
         if (Auth::attempt($credentials)) {
+            // Regenera o ID da sessão para prevenir ataques de fixação de sessão
             $request->session()->regenerate();
 
+            // Obtém o Model do usuário autenticado no momento
             $user = Auth::user();
 
             // Verificação dupla de admin (Garante que vai ler o banco corretamente)
@@ -46,6 +54,7 @@ class AuthController extends Controller
             return redirect()->intended(route('home'))->with('success', 'Bem-vinda de volta!');
         }
 
+        // Se a autenticação falhar, retorna à página anterior preenchendo apenas o e-mail e exibindo erro
         return back()->withErrors([
             'email' => 'As credenciais informadas não correspondem aos nossos registros.',
         ])->onlyInput('email');
@@ -56,6 +65,7 @@ class AuthController extends Controller
      */
     public function showRegisterForm()
     {
+        // Retorna a view localizada em resources/views/auth/cadastro.blade.php
         return view('auth.cadastro');
     }
 
@@ -64,6 +74,7 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        // Valida as informações preenchidas no formulário de cadastro
         $validated = $request->validate([
             'nome'            => ['required', 'string', 'max:255'],
             'email'           => ['required', 'string', 'email', 'max:255', 'unique:users,email', 'unique:clientes,email', 'unique:vendedoras,email'],
@@ -86,15 +97,15 @@ class AuthController extends Controller
 
         // Uso de transação para garantir integridade (ou cria ambos, ou aborta)
         $user = DB::transaction(function () use ($validated, $cpfLimpo, $cepLimpo) {
-            // 1. Cria a conta de autenticação base
+            // 1. Cria a conta de autenticação base na tabela 'users'
             $user = User::create([
                 'name'     => $validated['nome'],
                 'email'    => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make($validated['password']), // Criptografa a senha
                 'role'     => $validated['tipo_perfil'],
             ]);
 
-            // 2. Prepara os dados detalhados para a tabela específica
+            // 2. Prepara os dados detalhados para a tabela específica (clientes ou vendedoras)
             $dadosPerfil = [
                 'user_id'         => $user->id,
                 'nome'            => $validated['nome'],
@@ -133,10 +144,14 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        // Desloga o usuário
         Auth::logout();
+        
+        // Invalida a sessão atual e regenera o token CSRF por segurança
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Redireciona para a página inicial
         return redirect('/')->with('success', 'Sessão encerrada.');
     }
 
@@ -145,6 +160,7 @@ class AuthController extends Controller
      */
     public function showForgotPasswordForm()
     {
+        // Retorna a view para solicitação de reset de senha
         return view('auth.forgot-password');
     }
 
@@ -153,19 +169,24 @@ class AuthController extends Controller
      */
     public function sendResetLinkEmail(Request $request)
     {
+        // Valida se o e-mail existe na tabela 'users'
         $request->validate(
             ['email' => 'required|email|exists:users,email'],
             ['email.exists' => 'Não encontramos uma conta cadastrada com este e-mail.']
         );
 
+        // Envia o link com o token via Password broker do Laravel
         $status = Password::sendResetLink($request->only('email'));
 
+        // Se o envio for bem-sucedido, retorna exibindo mensagem de sucesso
         if ($status === Password::RESET_LINK_SENT) {
             return back()->with('status', 'Enviamos o link de redefinição para o seu e-mail!');
         }
 
+        // Se falhar, retorna com mensagem de erro
         return back()->withErrors(['email' => 'Não foi possível enviar o e-mail. Tente novamente.']);
     }
+
     /**
      * Processa a redefinição de senha
      */
@@ -178,11 +199,11 @@ class AuthController extends Controller
             'password' => 'required|min:8', 
         ]);
 
-        // 2. Tenta redefinir a senha
+        // 2. Tenta redefinir a senha verificando o token
         $status = Password::reset(
             $request->only('email', 'password', 'token'),
             function ($user, string $password) {
-                // Altera a senha criptografando com Hash
+                // Altera a senha criptografando com Hash e gera um novo remember_token
                 $user->forceFill([
                     'password' => Hash::make($password)
                 ])->setRememberToken(Str::random(60));
@@ -196,7 +217,7 @@ class AuthController extends Controller
             return redirect()->route('login')->with('success', 'Sua senha foi redefinida com sucesso! Faça login para continuar.');
         }
 
-        // Se falhar (ex: token expirado), volta com erro
+        // Se falhar (ex: token expirado), volta com erro traduzido
         return back()->withErrors(['email' => __($status)]);
     }
 }

@@ -150,4 +150,15 @@ class VendedoraController extends Controller
 
         return redirect()->route('vendedoras.index')->with('success', 'Vendedora removida com sucesso!');
     }
+    public function show($id)
+    {
+        // Busca a vendedora pelo ID dela ou pelo user_id (para evitar erros de ID do navbar)
+        $vendedora = Vendedora::with(['user', 'projetos', 'avaliacoes.user'])
+            ->where('id', $id)
+            ->orWhere('user_id', $id)
+            ->firstOrFail();
+
+        return view('criadoras.perfil', compact('vendedora'));
+    }
+    
 }
