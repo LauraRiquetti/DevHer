@@ -1,3 +1,4 @@
+{{-- Estende o layout principal da aplicação --}}
 @extends('layouts.app')
 
 @section('title', 'Redefinir senha')
@@ -7,23 +8,32 @@
     <div class="glow glow-1"></div>
     <div class="auth-wrap">
         <div class="form-card reveal in">
+            
+            <!-- Textos de introdução -->
             <span class="eyebrow">Quase lá</span>
             <h1>Definir nova senha</h1>
             <p class="sub">Escolha uma senha forte, com pelo menos 8 caracteres.</p>
 
+            {{-- Exibe erro de validação (ex: senhas não conferem, token expirado) --}}
             @if ($errors->any())
                 <div class="alert alert-error">{{ $errors->first() }}</div>
             @endif
 
+            <!-- Formulário de definição da nova senha -->
             <form method="POST" action="{{ route('password.update') ?? '#' }}">
                 @csrf
+                
+                {{-- Campo oculto que envia o token de segurança recebido via URL do e-mail --}}
                 <input type="hidden" name="token" value="{{ $token ?? '' }}">
 
+                <!-- O e-mail também precisa ser enviado para validar junto com o token -->
                 <div class="field">
                     <label for="email">E-mail</label>
+                    {{-- Preenche o e-mail automaticamente se ele vier pela URL, senão usa o old() --}}
                     <input type="email" name="email" id="email" value="{{ old('email', $email ?? '') }}" required autofocus>
                 </div>
 
+                <!-- Campo da Nova Senha -->
                 <div class="field">
                     <label for="password">Nova senha</label>
                     <div style="position: relative;">
@@ -34,6 +44,7 @@
                     </div>
                 </div>
 
+                <!-- Campo de Confirmação da Nova Senha -->
                 <div class="field">
                     <label for="password_confirmation">Confirmar nova senha</label>
                     <div style="position: relative;">

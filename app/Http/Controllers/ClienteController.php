@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 
 class ClienteController extends Controller
 {
@@ -136,7 +137,14 @@ class ClienteController extends Controller
             }
         });
 
-        return redirect()->route('clientes.index')->with('success', 'Perfil do cliente atualizado!');
+        // Verifica se o usuário logado é vendedora
+        if (Auth::user()->role === 'vendedora') {
+            // Substitua 'vendedoras.show' pelo nome correto da sua rota de vendedora, se for diferente
+            return redirect()->route('vendedoras.show', Auth::id())->with('success', 'Perfil atualizado!');
+        }
+
+        // Se for cliente, vai para a rota de cliente
+        return redirect()->route('clientes.show', Auth::id())->with('success', 'Perfil do cliente atualizado!');
     }
 
     public function destroy(Cliente $cliente)

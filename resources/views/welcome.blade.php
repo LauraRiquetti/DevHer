@@ -1,25 +1,37 @@
+<!-- Extende a estrutura base definida no layout principal da aplicação -->
 @extends('layouts.app')
 
+<!-- Define o título da aba do navegador para a página inicial -->
 @section('title', 'Início')
 
+<!-- Início do bloco de conteúdo principal inserido no @yield('content') do layout -->
 @section('content')
 
+<!-- Seção principal da página (Hero Banner) -->
 <section class="hero">
+    <!-- Elementos visuais de iluminação/brilho estilizados via CSS -->
     <div class="glow glow-1"></div>
     <div class="glow glow-2"></div>
     <div class="wrap hero-inner">
+        <!-- Subtítulo de apresentação do projeto -->
         <span class="eyebrow">Feito por, com e para mulheres da tecnologia</span>
+        <!-- Título principal da landing page -->
         <h1>Aprenda, conecte-se e <span class="accent">venda seus projetos</span> em tecnologia.</h1>
+        <!-- Descrição geral da proposta da plataforma -->
         <p>Cursos, mentorias, portfólio e uma comunidade real de mulheres na TI — em um único ecossistema pensado para reduzir a evasão feminina e abrir portas no mercado.</p>
+        <!-- Botões de chamada para ação (CTAs) -->
         <div class="hero-ctas">
+            <!-- Verifica se o usuário está autenticado na sessão -->
             @auth
                 {{-- Exibe O BOTÃO SOMENTE se for Admin --}}
                 @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
                     <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Acessar Painel Admin</a>
                 @endif
             @else
+                <!-- Caso seja um visitante não logado, exibe a opção de cadastro -->
                 <a href="{{ route('cadastro') }}" class="btn btn-primary">Comece grátis</a>
             @endauth
+            <!-- Âncora para rolar a página até a seção informativa -->
             <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
         </div>
     </div>
@@ -27,13 +39,16 @@
     {{-- Constelação Dinâmica com usuárias do Banco --}}
     <div class="wrap">
         <div class="constellation reveal">
+            <!-- Gráfico vetorial interativo de nós/conexões representando a rede da comunidade -->
             <svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg">
                 <defs>
+                    <!-- Definição de gradiente de cor para os pontos (nós) da constelação -->
                     <radialGradient id="nodeGrad" cx="50%" cy="50%" r="60%">
                         <stop offset="0%" stop-color="#FF9AC7"/>
                         <stop offset="100%" stop-color="#FF2D87"/>
                     </radialGradient>
                 </defs>
+                <!-- Grupo de linhas que conectam as posições dos pontos no SVG -->
                 <g stroke="rgba(255,45,135,0.28)" stroke-width="1">
                     <line x1="150" y1="90" x2="330" y2="150"/>
                     <line x1="330" y1="150" x2="520" y2="80"/>
@@ -46,6 +61,7 @@
                     <line x1="520" y1="80" x2="650" y2="200"/>
                     <line x1="800" y1="110" x2="720" y2="60"/>
                 </g>
+                <!-- Desenho dos pontos (círculos) usando o gradiente predefinido -->
                 <g>
                     <circle cx="150" cy="90" r="7" fill="url(#nodeGrad)"/>
                     <circle cx="330" cy="150" r="10" fill="url(#nodeGrad)"/>
@@ -57,8 +73,10 @@
                     <circle cx="230" cy="260" r="6" fill="url(#nodeGrad)"/>
                     <circle cx="720" cy="60" r="5" fill="url(#nodeGrad)"/>
                 </g>
+                <!-- Rótulos de texto que exibem os nomes das vendedoras -->
                 <g class="node-label">
                     @php
+                        // Matriz de coordenadas (X, Y) fixas para posicionar os usernames dentro do SVG
                         $coordenadas = [
                             ['x' => 330, 'y' => 130],
                             ['x' => 470, 'y' => 245],
@@ -68,13 +86,17 @@
                             ['x' => 230, 'y' => 280],
                         ];
                     @endphp
+                    <!-- Itera pela lista de vendedoras trazida do controller -->
                     @forelse($vendedoras as $idx => $vendedora)
+                        <!-- Garante que exista uma coordenada configurada para a posição atual -->
                         @if(isset($coordenadas[$idx]))
                             <text x="{{ $coordenadas[$idx]['x'] }}" y="{{ $coordenadas[$idx]['y'] }}">
+                                <!-- Converte o nome para formato slug de @arroba (ex: @mariana-dev) com fallback de nome -->
                                 @ {{ Str::slug($vendedora->name ?? $vendedora->nome ?? 'desenvolvedora') }}
                             </text>
                         @endif
                     @empty
+                        <!-- Nomes estáticos exibidos caso não haja vendedoras cadastradas no banco -->
                         <text x="330" y="130">@mariana.dev</text>
                         <text x="470" y="245">@ana.backend</text>
                         <text x="650" y="185">@lu.uxui</text>
@@ -85,9 +107,11 @@
     </div>
 </section>
 
+<!-- Seção de apoio / comunidades parceiras -->
 <section class="apoio">
     <div class="wrap">
         <p>Redes e iniciativas que caminham com a gente</p>
+        <!-- Chips/tags com nomes das comunidades representadas -->
         <div class="apoio-row">
             <span class="chip">PyLadies</span>
             <span class="chip">Women Techmakers</span>
@@ -102,6 +126,7 @@
 {{-- Seção de Marketplace --}}
 <section class="feature" id="marketplace">
     <div class="wrap">
+        <!-- Texto explicativo da funcionalidade de Marketplace -->
         <div class="feature-copy reveal">
             <span class="eyebrow">Marketplace de projetos</span>
             <h2>Transforme seu portfólio em renda.</h2>
@@ -112,19 +137,24 @@
                 <span class="tag">PAGAMENTO INTEGRADO</span>
             </div>
         </div>
+        <!-- Mockup visual simulando a interface da loja -->
         <div class="mock reveal">
             <div class="mock-bar"><span></span><span></span><span></span></div>
             <div class="mock-title">marketplace / projetos em alta</div>
             <div class="proj-grid">
+                <!-- Itera pelos 2 primeiros projetos passados pelo controller -->
                 @forelse($projetos->take(2) as $projeto)
                     <div class="proj-card">
                         <div class="proj-thumb"></div>
+                        <!-- Exibe título/nome do projeto -->
                         <h4>{{ $projeto->titulo ?? $projeto->nome }}</h4>
+                        <!-- Formata o valor numérico para a moeda brasileira (R$) -->
                         <span class="price">
                             R$ {{ number_format($projeto->preco ?? $projeto->valor ?? 0, 2, ',', '.') }}
                         </span>
                     </div>
                 @empty
+                    <!-- Exibição padrão caso o banco não retorne nenhum projeto -->
                     <div class="proj-card">
                         <div class="proj-thumb"></div>
                         <h4>Nenhum projeto cadastrado</h4>
@@ -139,6 +169,7 @@
 {{-- Seção de Cursos e Mentorias --}}
 <section class="feature reverse" id="cursos">
     <div class="wrap">
+        <!-- Texto explicativo da área de cursos -->
         <div class="feature-copy reveal">
             <span class="eyebrow">Cursos e mentorias</span>
             <h2>Aprenda no seu ritmo, com quem já passou pelo caminho.</h2>
@@ -148,16 +179,21 @@
                 <span class="tag">MENTORIAS AO VIVO</span>
             </div>
         </div>
+        <!-- Mockup de listagem dos cursos cadastrados -->
         <div class="mock reveal">
             <div class="mock-bar"><span></span><span></span><span></span></div>
             <div class="mock-title">cursos / recomendados para você</div>
             
+            <!-- Itera pelos 3 primeiros cursos retornados da consulta -->
             @forelse($cursos->take(3) as $key => $curso)
                 <div class="course-row">
+                    <!-- Contador visual ordenado no formato (01, 02, 03) -->
                     <div class="course-thumb">0{{ $key + 1 }}</div>
                     <div>
+                        <!-- Exibe o título do curso -->
                         <h4>{{ $curso->titulo ?? $curso->nome }}</h4>
                         <span>
+                            <!-- Formata a exibição do preço ou exibe 'Gratuito' se for valor zero -->
                             @if(($curso->preco ?? 0) == 0)
                                 Gratuito
                             @else
@@ -166,11 +202,13 @@
                             · {{ $curso->duracao ?? 'Carga horária N/A' }}
                         </span>
                     </div>
+                    <!-- Exibe selo para conteúdos voltados a maiores de 18 anos, se configurado -->
                     @if(isset($curso->is_18plus) && $curso->is_18plus)
                         <span class="badge-18">18+</span>
                     @endif
                 </div>
             @empty
+                <!-- Mensagem padrão exibida na ausência de registros -->
                 <p style="color: var(--muted); padding: 16px;">Nenhum curso cadastrado no momento.</p>
             @endforelse
 
@@ -178,23 +216,27 @@
     </div>
 </section>
 
-{{-- Estatísticas Reais --}}
+{{-- Seção de Estatísticas do Ecossistema --}}
 <section class="stats">
     <div class="wrap">
         <h2 class="reveal">Cada número representa uma trajetória que continuou.</h2>
         <div class="stats-grid">
+            <!-- Total de criadoras cadastradas -->
             <div class="reveal">
                 <div class="stat-num" data-count="{{ $totalCriadoras > 0 ? $totalCriadoras : 18 }}">{{ $totalCriadoras }}</div>
                 <div class="stat-label">criadoras cadastradas na plataforma</div>
             </div>
+            <!-- Total de projetos publicados no marketplace -->
             <div class="reveal">
                 <div class="stat-num" data-count="{{ $totalProjetos > 0 ? $totalProjetos : 10 }}">{{ $totalProjetos }}</div>
                 <div class="stat-label">projetos ativos no marketplace</div>
             </div>
+            <!-- Indicador estático de disponibilidade de conteúdo -->
             <div class="reveal">
                 <div class="stat-static" style="font-size: var(--stat-size, 3rem); font-weight: 800; color: var(--pink-main, #ff2d87);">24h</div>
                 <div class="stat-label">de conteúdo disponível</div>
             </div>
+            <!-- Indicador estático de porcentagem da taxa da plataforma -->
             <div class="reveal">
                 <div class="stat-num" data-count="5">5</div>
                 <div class="stat-label">de taxa sobre vendas no ecossistema</div>
@@ -203,6 +245,7 @@
     </div>
 </section>
 
+<!-- Seção do passo a passo do fluxo da aplicação -->
 <section class="how" id="como-funciona">
     <div class="wrap">
         <div class="how-head reveal">
@@ -218,6 +261,7 @@
     </div>
 </section>
 
+<!-- Seção de pilares/jornada do ecossistema -->
 <section class="planos" id="jornada">
     <div class="wrap">
         <div class="planos-head reveal">
@@ -229,6 +273,7 @@
         </div>
         
         <div class="plans-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+            <!-- Pilar 1: Aprender -->
             <div class="plan reveal">
                 <h3>01. Aprenda</h3>
                 <div class="sub">Desenvolva novas habilidades</div>
@@ -238,6 +283,7 @@
                 <a href="{{ route('cursos.index') }}" class="btn btn-ghost btn-block">Explorar cursos</a>
             </div>
 
+            <!-- Pilar 2: Conectar (Com destaque visual) -->
             <div class="plan featured reveal">
                 <span class="pill">Comunidade</span>
                 <h3>02. Conecte-se</h3>
@@ -245,6 +291,7 @@
                 <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 20px;">
                     Troque experiências, encontre parcerias para projetos e fortaleça sua rede de contatos na área de TI.
                 </p>
+                <!-- Verificação de perfil para direcionamento correto dos botões -->
                 @auth
                     @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
                         <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-block">Acessar Painel Admin</a>
@@ -254,6 +301,7 @@
                 @endauth
             </div>
 
+            <!-- Pilar 3: Rentabilizar -->
             <div class="plan reveal">
                 <h3>03. Rentabilize</h3>
                 <div class="sub">Venda seus projetos</div>
@@ -266,11 +314,13 @@
     </div>
 </section>
 
+<!-- Seção de chamada para ação final no rodapé da página -->
 <section class="cta-final">
     <div class="glow glow-1" style="top:-260px;"></div>
     <div class="wrap">
         <h2 class="reveal">Sua trajetória na tecnologia não precisa continuar sozinha.</h2>
         <p class="reveal">Cadastre-se em minutos e comece a aprender, construir e vender hoje mesmo.</p>
+        <!-- Redirecionamento condicional de acordo com o status de autenticação -->
         @auth
             @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-primary reveal">Acessar Painel Admin</a>

@@ -56,18 +56,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Mostrar/Ocultar Senha (com ícones do Bootstrap)
+// Define a função globalmente no objeto window para ser chamada pelo evento onclick nos inputs de senha
 window.togglePassword = function(inputId, buttonInfo) {
+    // Captura o elemento do input de senha pelo seu ID
     const input = document.getElementById(inputId);
-    const icon = buttonInfo.querySelector('i'); // Agora pega a tag <i>
+    // Localiza o elemento da tag <i> (ícone do Bootstrap) dentro do botão clicado
+    const icon = buttonInfo.querySelector('i');
 
+    // Verifica se o campo de texto está atualmente com o tipo 'password' (senha oculta)
     if (input.type === 'password') {
+        // Altera o tipo do input para 'text' para revelar a senha
         input.type = 'text';
-        icon.className = 'bi bi-toggle-on'; // Ícone ligado (mostrando)
-        icon.style.color = 'var(--pink-light)'; // Dá um destaque na cor quando ativo
+        // Troca a classe do ícone para o switch/toggle ligado
+        icon.className = 'bi bi-toggle-on';
+        // Aplica a cor rosa destacada (usando a variável CSS) quando visível
+        icon.style.color = 'var(--pink-light)';
     } else {
+        // Altera o tipo do input de volta para 'password' para ocultar a senha
         input.type = 'password';
-        icon.className = 'bi bi-toggle-off'; // Ícone desligado (oculto)
-        icon.style.color = 'inherit'; // Volta a cor normal
+        // Troca a classe do ícone para o switch/toggle desligado
+        icon.className = 'bi bi-toggle-off';
+        // Restaura a cor padrão do elemento
+        icon.style.color = 'inherit';
     }
 };
