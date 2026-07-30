@@ -43,6 +43,7 @@ class PagamentoController extends Controller
                     'failure' => route('pagamento.falha'),
                     'pending' => route('pagamento.pendente'),
                 ],
+                'notification_url' => route('pagamento.notificacao'), // <-- ADICIONE ESTA LINHA
                 'auto_return' => 'approved',
             ]);
 
@@ -67,5 +68,22 @@ class PagamentoController extends Controller
     public function pendente()
     {
         return view('loja.sucesso')->with('mensagem', 'Seu pagamento está em análise ou aguardando aprovação.');
+    }
+    public function notificacao(Request $request)
+    {
+        // O Mercado Pago envia os dados via query params ou body
+        $type = $request->input('type') ?? $request->input('topic');
+
+        if ($type === 'payment') {
+            $paymentId = $request->input('data.id') ?? $request->input('id');
+            
+            // Aqui você pode buscar as informações do pagamento e atualizar o status da venda no banco de dados
+            // Exemplo: MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
+            // $client = new \MercadoPago\Client\Payment\PaymentClient();
+            // $payment = $client->get($paymentId);
+            // ... Lógica para marcar o pedido como 'pago' no banco
+        }
+
+        return response()->json(['status' => 'ok'], 200);
     }
 }

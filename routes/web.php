@@ -76,7 +76,6 @@ Route::middleware(['auth'])->group(function () {
     // Gerenciamento de Conta / Vendedora
     Route::put('/vendedoras/{vendedora}', [VendedoraController::class, 'update'])->name('vendedoras.update');
     Route::delete('/vendedoras/{vendedora}', [VendedoraController::class, 'destroy'])->name('vendedoras.destroy');
-    Route::post('/avaliacoes', function () { return back(); })->name('avaliacoes.store');
 
     // Gerenciamento de Projetos (Criar, Editar, Deletar)
     Route::get('/projetos/novo', [ProjetoController::class, 'create'])->name('projetos.create');
@@ -100,6 +99,9 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('auth')
         ->name('avaliacoes.store');
 });
+
+// Rota para receber notificações automáticas de pagamento do Mercado Pago
+Route::post('/pagamento/notification', [PagamentoController::class, 'notificacao'])->name('pagamento.notificacao');
 
 
 /*
