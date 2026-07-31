@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use MercadoPago\MercadoPagoConfig;
-use MercadoPago\Client\Preference\PreferenceClient;
+use Illuminate\Support\Facades\Http; // <-- Importando o Cliente HTTP do Laravel
 
 class PagamentoController extends Controller
 {
@@ -16,8 +15,7 @@ class PagamentoController extends Controller
             return redirect()->route('carrinho.index')->with('erro', 'Seu carrinho está vazio.');
         }
 
-        MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
-
+        // 1. Monta os itens no formato exigido pela API
         $items = [];
         foreach ($carrinho as $item) {
             $items[] = [
@@ -29,61 +27,32 @@ class PagamentoController extends Controller
             ];
         }
 
-        $client = new PreferenceClient();
-        
-        try {
-            $preference = $client->create([
+        // 2. Faz a chamada direta para a API do Mercado Pago usando o token
+        $response = Http::withToken(config('services.mercadopago.access_token'))
+            ->post('https://api.mercadopago.com/checkout/preferences', [
                 'items' => $items,
-                'payer' => [
-                    'name'  => auth()->user()->name ?? 'Cliente',
-                    'email' => auth()->user()->email ?? 'cliente@email.com',
-                ],
+                /* Descomente e ajuste abaixo se quiser configurar as URLs de retorno após o pagamento:
                 'back_urls' => [
-                    'success' => route('pagamento.sucesso'),
-                    'failure' => route('pagamento.falha'),
-                    'pending' => route('pagamento.pendente'),
+                    'success' => route('home'), // Rota quando der certo
+                    'failure' => route('home'), // Rota quando falhar
+                    'pending' => route('home'), // Rota quando ficar pendente
                 ],
-                'notification_url' => route('pagamento.notificacao'), // <-- ADICIONE ESTA LINHA
                 'auto_return' => 'approved',
+                */
             ]);
 
-            return redirect($preference->sandbox_init_point ?? $preference->init_point);
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('erro', 'Erro ao conectar ao Mercado Pago: ' . $e->getMessage());
-        }
-    }
-
-    public function sucesso(Request $request)
-    {
-        session()->forget('carrinho');
-        return view('loja.sucesso');
-    }
-
-    public function falha()
-    {
-        return redirect()->route('carrinho.index')->with('erro', 'O pagamento foi recusado ou cancelado.');
-    }
-
-    public function pendente()
-    {
-        return view('loja.sucesso')->with('mensagem', 'Seu pagamento está em análise ou aguardando aprovação.');
-    }
-    public function notificacao(Request $request)
-    {
-        // O Mercado Pago envia os dados via query params ou body
-        $type = $request->input('type') ?? $request->input('topic');
-
-        if ($type === 'payment') {
-            $paymentId = $request->input('data.id') ?? $request->input('id');
+        // 3. Verifica se a requisição deu certo
+        if ($response->successful()) {
+            $preference = $response->json();
             
-            // Aqui você pode buscar as informações do pagamento e atualizar o status da venda no banco de dados
-            // Exemplo: MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
-            // $client = new \MercadoPago\Client\Payment\PaymentClient();
-            // $payment = $client->get($paymentId);
-            // ... Lógica para marcar o pedido como 'pago' no banco
+            // Redireciona o usuário para o link de pagamento do Mercado Pago
+            // Obs: Estamos usando sandbox_init_point para testes. Para produção, seria init_point
+            $linkPagamento = $preference['sandbox_init_point'] ?? $preference['init_point'];
+            
+            return redirect()->away($linkPagamento);
         }
 
-        return response()->json(['status' => 'ok'], 200);
+        // 4. Se a API do Mercado Pago recusar ou der erro
+        return redirect()->route('carrinho.index')->with('erro', 'Falha ao conectar com o Mercado Pago. Verifique suas credenciais.');
     }
 }
