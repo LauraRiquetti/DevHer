@@ -10,12 +10,22 @@
             <li><a href="{{ url('/#jornada') }}">Comece sua jornada</a></li>
         </ul>
 
-        <div class="nav-cta">
+        <div class="nav-cta" style="display: flex; align-items: center; gap: 15px;">
             
+            {{-- Ícone do Carrinho de Compras --}}
+            <a href="{{ route('carrinho.index') }}" class="nav-cart-link" style="position: relative; display: flex; align-items: center; color: inherit; text-decoration: none; font-size: 1.4rem;">
+                <i class="bi bi-cart4"></i>
+                @if(session('carrinho') && count(session('carrinho')) > 0)
+                    <span class="badge" style="position: absolute; top: -6px; right: -10px; background-color: var(--pink-light, #e83e8c); color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                        {{ count(session('carrinho')) }}
+                    </span>
+                @endif
+            </a>
+
             {{-- Se o usuário estiver autenticado no sistema --}}
             @auth
                 {{-- Link dinâmico: Verifica se a role é 'vendedora' para mandar para a rota certa --}}
-                <a href="{{ Auth::user()->role === 'vendedora' ? route('criadoras.show', Auth::user()->id) : route('clientes.show', Auth::user()->id) }}" class="nav-user" style="display: flex; align-items: center; gap: 10px; margin-right: 15px; text-decoration: none; color: inherit; cursor: pointer;">
+                <a href="{{ Auth::user()->role === 'vendedora' ? route('criadoras.show', Auth::user()->id) : route('clientes.show', Auth::user()->id) }}" class="nav-user" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; cursor: pointer;">
                     
                     <div class="avatar-sm" style="width: 32px; height: 32px; background-color: var(--pink-light, #e83e8c); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}

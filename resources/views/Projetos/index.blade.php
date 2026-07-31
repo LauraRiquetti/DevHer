@@ -16,10 +16,10 @@
 <section style="padding:48px 0 100px;">
     <div class="wrap">
 
-        {{-- Mensagem de Sucesso --}}
-        @if (session('success'))
+        {{-- Mensagem de Sucesso (Corrigida para 'sucesso') --}}
+        @if (session('sucesso'))
             <div style="padding: 12px 16px; background: #d4edda; color: #155724; border-radius: 6px; margin-bottom: 24px;">
-                {{ session('success') }}
+                {{ session('sucesso') }}
             </div>
         @endif
 
@@ -59,14 +59,16 @@
                             <img src="{{ $projeto->imagem }}" alt="{{ $projeto->nome }}" style="width:100%; height:100%; object-fit:cover;">
                         @endif
                     </div>
-                    
+
                     <span class="categoria" style="text-transform: capitalize;">{{ $projeto->status }}</span>
                     <h4>{{ $projeto->nome }}</h4>
                     <span class="autora">por {{ $projeto->user->name ?? 'Autor Desconhecido' }}</span>
                     <span class="price">R$ {{ number_format($projeto->preco, 2, ',', '.') }}</span>
-                    
+
                     @if($projeto->status === 'disponivel')
-                        <form method="POST" action="{{ route('carrinho.add', $projeto->id) ?? '#' }}" style="margin-top:12px;">
+                        {{-- A CORREÇÃO ESTÁ NESTA LINHA ABAIXO: --}}
+                        {{-- Adicionamos o array com 'tipo' => 'projeto' e o 'id' --}}
+                        <form method="POST" action="{{ route('carrinho.add', ['tipo' => 'projeto', 'id' => $projeto->id]) }}" style="margin-top:12px;">
                             @csrf
                             <button type="submit" class="btn btn-ghost btn-sm btn-block">Adicionar ao carrinho</button>
                         </form>

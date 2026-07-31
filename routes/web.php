@@ -58,6 +58,7 @@ Route::delete('/carrinho/remover/{chave}', [CarrinhoController::class, 'remover'
 Route::post('/carrinho/limpar', [CarrinhoController::class, 'limpar'])->name('carrinho.limpar');
 
 
+
 /*
 |--------------------------------------------------------------------------
 | ROTAS AUTENTICADAS (Apenas usuários logados)
@@ -102,6 +103,8 @@ Route::middleware(['auth'])->group(function () {
 
 // Rota para receber notificações automáticas de pagamento do Mercado Pago
 Route::post('/pagamento/notification', [PagamentoController::class, 'notificacao'])->name('pagamento.notificacao');
+Route::post('/carrinho/adicionar/{tipo}/{id}', [App\Http\Controllers\CarrinhoController::class, 'adicionar'])->name('carrinho.add');
+Route::post('/carrinho/adicionar/{tipo}/{id}', [CarrinhoController::class, 'adicionar'])->name('carrinho.add');
 
 
 /*
