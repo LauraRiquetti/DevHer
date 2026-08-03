@@ -38,6 +38,6 @@
     <!-- Carregamento do arquivo JavaScript principal da aplicação -->
     <script src="{{ asset('js/app.js') }}"></script>
     <!-- Seção reservada para injeção de scripts adicionais específicos de views filhas -->
-    @yield('scripts')
+    @stack('scripts')
 </body>
 </html>
