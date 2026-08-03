@@ -1,13 +1,86 @@
-@extends('layouts.app')
+@extends('Layouts.app')
 
 @section('title', 'Início')
 
 @section('content')
 
-<section class="hero">
+<section class="hero-home">
     <div class="glow glow-1"></div>
     <div class="glow glow-2"></div>
+
+    {{-- Ilustração de fundo: duas figuras estilizadas programando lado a lado.
+         É vetorial (SVG, feito à mão), não uma foto de terceiros — assim não
+         depende de licença de imagem e continua nítida em qualquer tela/zoom. --}}
+    <div class="hero-home-art" aria-hidden="true">
+        <svg viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="figGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#FF9AC7" stop-opacity=".95"/>
+                    <stop offset="100%" stop-color="#FF2D87" stop-opacity=".55"/>
+                </linearGradient>
+                <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#2B0A1E"/>
+                    <stop offset="100%" stop-color="#1B0612"/>
+                </linearGradient>
+                {{-- Brilho suave atrás das telas, como se a tela iluminasse o ambiente --}}
+                <filter id="screenGlow" x="-60%" y="-60%" width="220%" height="220%">
+                    <feGaussianBlur stdDeviation="14"/>
+                </filter>
+            </defs>
+
+            <!-- bancada -->
+            <rect x="120" y="382" width="960" height="8" rx="4" fill="url(#figGrad)" opacity=".45"/>
+
+            <!-- brilho atrás do notebook 1 -->
+            <ellipse cx="375" cy="290" rx="90" ry="70" fill="#FF2D87" opacity=".35" filter="url(#screenGlow)"/>
+            <!-- notebook 1 -->
+            <g opacity=".92">
+                <rect x="300" y="332" width="150" height="8" rx="3" fill="#FF2D87" opacity=".6"/>
+                <path d="M312 332 L322 254 L438 254 L448 332 Z" fill="#120910" stroke="#FF9AC7" stroke-width="1.25"/>
+                <rect x="332" y="264" width="86" height="54" rx="3" fill="url(#screenGrad)" stroke="#FF2D87" stroke-width="1"/>
+                <line class="typing-pulse" x1="342" y1="277" x2="398" y2="277" stroke="#FF9AC7" stroke-width="2"/>
+                <line class="typing-pulse delay-1" x1="342" y1="288" x2="408" y2="288" stroke="#FF9AC7" stroke-width="2"/>
+                <line class="typing-pulse delay-2" x1="342" y1="299" x2="386" y2="299" stroke="#FF9AC7" stroke-width="2"/>
+            </g>
+            <!-- figura 1 (silhueta limpa: cabeça + corpo em card arredondado) -->
+            <g opacity=".92">
+                <circle cx="270" cy="222" r="25" fill="url(#figGrad)"/>
+                <rect x="222" y="252" width="96" height="100" rx="34" fill="url(#figGrad)" opacity=".9"/>
+            </g>
+
+            <!-- brilho atrás do notebook 2 -->
+            <ellipse cx="725" cy="290" rx="90" ry="70" fill="#FF2D87" opacity=".35" filter="url(#screenGlow)"/>
+            <!-- notebook 2 -->
+            <g opacity=".92">
+                <rect x="650" y="332" width="150" height="8" rx="3" fill="#FF2D87" opacity=".6"/>
+                <path d="M662 332 L672 254 L788 254 L798 332 Z" fill="#120910" stroke="#FF9AC7" stroke-width="1.25"/>
+                <rect x="682" y="264" width="86" height="54" rx="3" fill="url(#screenGrad)" stroke="#FF2D87" stroke-width="1"/>
+                <line class="typing-pulse delay-2" x1="692" y1="277" x2="748" y2="277" stroke="#FF9AC7" stroke-width="2"/>
+                <line class="typing-pulse" x1="692" y1="288" x2="758" y2="288" stroke="#FF9AC7" stroke-width="2"/>
+                <line class="typing-pulse delay-1" x1="692" y1="299" x2="736" y2="299" stroke="#FF9AC7" stroke-width="2"/>
+            </g>
+            <!-- figura 2 -->
+            <g opacity=".92">
+                <circle cx="900" cy="217" r="27" fill="url(#figGrad)"/>
+                <rect x="850" y="248" width="100" height="104" rx="36" fill="url(#figGrad)" opacity=".9"/>
+            </g>
+
+            <!-- linha de colaboração entre as duas -->
+            <path d="M450 300 C520 258 680 258 690 300" fill="none" stroke="#FF9AC7" stroke-width="1.25" stroke-dasharray="3 7" opacity=".45"/>
+        </svg>
+    </div>
+
     <div class="wrap hero-inner">
+        {{-- Cards flutuantes de prova social — só aparecem em telas maiores (ver CSS) --}}
+        <div class="floating-proof floating-proof-1 reveal">
+            <div class="avatars"><span></span><span></span><span></span></div>
+            <div><strong>+1.200 mulheres</strong><br><span class="label">já estão na comunidade</span></div>
+        </div>
+        <div class="floating-proof floating-proof-2 reveal">
+            <div class="avatars"><span></span><span></span></div>
+            <div><strong>320+ projetos</strong><br><span class="label">vendidos no marketplace</span></div>
+        </div>
+
         <span class="eyebrow">Feito por, com e para mulheres da tecnologia</span>
         <h1>Aprenda, conecte-se e <span class="accent">venda seus projetos</span> em tecnologia.</h1>
         <p>Cursos, mentorias, portfólio e uma comunidade real de mulheres na TI — em um único ecossistema pensado para reduzir a evasão feminina e abrir portas no mercado.</p>

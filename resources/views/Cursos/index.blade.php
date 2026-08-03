@@ -1,53 +1,87 @@
-@extends('layouts.app')
+@extends('Layouts.app')
 
 @section('title', 'Cursos')
 
 @section('content')
-
-@php
-    $cursos = $cursos ?? [
-        ['titulo' => 'Lógica de programação do zero', 'carga' => '4h', 'preco' => null, 'restrito' => false],
-        ['titulo' => 'Segurança ofensiva na prática', 'carga' => '8h', 'preco' => '149,00', 'restrito' => true],
-        ['titulo' => 'Design de produto para devs', 'carga' => '5h', 'preco' => '79,00', 'restrito' => false],
-        ['titulo' => 'Introdução a bancos de dados', 'carga' => '6h', 'preco' => null, 'restrito' => false],
-    ];
-    // RF06: idade mínima calculada a partir da data de nascimento do usuário autenticado
-    $idadeUsuaria = $idadeUsuaria ?? null;
-@endphp
 
 <section class="page-head">
     <div class="glow glow-1" style="top:-260px;"></div>
     <div class="wrap">
         <span class="eyebrow">Aprender</span>
         <h1>Cursos e mentorias</h1>
-        <p>Conteúdos publicados por criadoras da comunidade, do primeiro código à especialização.</p>
+        <p>Conteúdos publicados pelas vendedoras da comunidade, do primeiro código à especialização.</p>
+        @if (session('vendedora_id'))
+            <a href="{{ route('cursos.create') }}" class="btn btn-primary btn-sm" style="margin-top:18px;">+ Publicar curso</a>
+        @endif
     </div>
 </section>
 
 <section style="padding:48px 0 100px;">
-    <div class="wrap" style="max-width:760px;">
-        @foreach ($cursos as $curso)
-            @php $bloqueado = $curso['restrito'] && ($idadeUsuaria === null || $idadeUsuaria < 18); @endphp
-            <div class="course-row" style="{{ $bloqueado ? 'opacity:.55;' : '' }}">
-                <div class="course-thumb">{{ Str::upper(Str::substr($curso['titulo'], 0, 2)) }}</div>
-                <div>
-                    <h4>{{ $curso['titulo'] }}</h4>
-                    <span>{{ $curso['preco'] ? 'R$ '.$curso['preco'] : 'Gratuito' }} · {{ $curso['carga'] }}</span>
+    <div class="wrap">
+
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        <div class="proj-grid">
+            @forelse ($cursos as $curso)
+                <div class="proj-card">
+                    @if ($curso->imagem)
+                        <div class="proj-thumb" style="background-image:url('{{ $curso->imagem }}');background-size:cover;background-position:center;"></div>
+                    @else
+                        <div class="proj-thumb"></div>
+                    @endif
+
+                    @if ($curso->categoria)
+                        <span class="categoria">{{ $curso->categoria }}</span>
+                    @endif
+
+                    <h4>{{ $curso->nome }}</h4>
+
+                    @if ($curso->descricao)
+                        <p style="font-size:12.5px;color:var(--muted);margin-top:6px;">
+                            {{ Str::limit($curso->descricao, 80) }}
+                        </p>
+                    @endif
+
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
+                        @if ((float) $curso->preco <= 0)
+                            <span class="badge-free">Gratuito</span>
+                        @else
+                            <span class="price">R$ {{ number_format($curso->preco, 2, ',', '.') }}</span>
+                        @endif
+                    </div>
+
+                    @if ((float) $curso->preco <= 0)
+                        {{-- Curso gratuito: acesso direto ao material, sem passar pelo carrinho --}}
+                        @if ($curso->link_material)
+                            <a href="{{ $curso->link_material }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm btn-block" style="margin-top:12px;">
+                                Acessar material
+                            </a>
+                        @else
+                            <span class="btn btn-ghost btn-sm btn-block" style="margin-top:12px;opacity:.6;cursor:default;">
+                                Material em breve
+                            </span>
+                        @endif
+                    @else
+                        {{-- Curso pago: precisa estar logada e passa pelo carrinho --}}
+                        @if (session('vendedora_id'))
+                            <form method="POST" action="{{ route('carrinho.add') }}" style="margin-top:12px;">
+                                @csrf
+                                <input type="hidden" name="curso_id" value="{{ $curso->id }}">
+                                <button type="submit" class="btn btn-ghost btn-sm btn-block">Adicionar ao carrinho</button>
+                            </form>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-ghost btn-sm btn-block" style="margin-top:12px;">
+                                Entrar para comprar
+                            </a>
+                        @endif
+                    @endif
                 </div>
-
-                @if ($curso['restrito'])
-                    <span class="badge-18">18+</span>
-                @else
-                    <span class="badge-free">Livre</span>
-                @endif
-            </div>
-
-            @if ($bloqueado)
-                <p style="font-size:12px;color:var(--muted-2);margin:-6px 0 16px 66px;">
-                    Este curso é liberado apenas para usuárias com 18 anos ou mais.
-                </p>
-            @endif
-        @endforeach
+            @empty
+                <p style="color:var(--muted);">Nenhum curso publicado ainda.</p>
+            @endforelse
+        </div>
     </div>
 </section>
 @endsection

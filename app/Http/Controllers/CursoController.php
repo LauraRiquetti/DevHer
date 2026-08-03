@@ -20,35 +20,43 @@ class CursoController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Valida os dados de acordo com as colunas da migration
+        // Valida os dados de acordo com as colunas da migration.
+        // Adicionei "link_material" (opcional) para os cursos gratuitos
+        // poderem ter um acesso direto ao conteúdo (vídeo/PDF/etc).
         $dadosValidados = $request->validate([
-            'nome'      => 'required|string|max:255',
-            'preco'     => 'required|numeric|min:0',
-            'descricao' => 'nullable|string',
-            'imagem'    => 'nullable|string', // Caso envie a URL ou caminho da imagem
-            'categoria'    => 'nullable|string',
-            'user_id'   => 'required|exists:users,id', // Ajustado para a tabela padrão 'users' do Laravel
-        ], [
-            'user_id.exists'  => 'O responsável selecionado não foi encontrado.',
+            'nome'          => 'required|string|max:255',
+            'preco'         => 'required|numeric|min:0',
+            'descricao'     => 'nullable|string',
+            'imagem'        => 'nullable|string',
+            'categoria'     => 'nullable|string',
+            'link_material' => 'nullable|url',
         ]);
 
-        // 2. Cria o projeto
+        // O "autor" do curso é a vendedora logada na sessão (não pedimos
+        // isso no formulário — é preenchido automaticamente aqui).
+        $dadosValidados['user_id'] = session('vendedora_id');
+
+        if (!$dadosValidados['user_id']) {
+            return back()
+                ->withErrors(['nome' => 'Você precisa estar logada como vendedora para publicar um curso.'])
+                ->withInput();
+        }
+
         Curso::create($dadosValidados);
 
         return redirect()->route('cursos.index')
             ->with('success', 'Curso cadastrado com sucesso!');
-    }   
+    }
 
     public function update(Request $request, Curso $curso)
     {
-        // 1. Valida os dados que podem ser atualizados
         $dadosValidados = $request->validate([
-            'nome'      => 'required|string|max:255',
-            'preco'     => 'required|numeric|min:0',
-            'descricao' => 'nullable|string',
-            'imagem'    => 'nullable|string',
-            'categoria'    => 'nullable|string',
-            'user_id'   => 'required|exists:users,id',
+            'nome'          => 'required|string|max:255',
+            'preco'         => 'required|numeric|min:0',
+            'descricao'     => 'nullable|string',
+            'imagem'        => 'nullable|string',
+            'categoria'     => 'nullable|string',
+            'link_material' => 'nullable|url',
         ]);
 
         $curso->update($dadosValidados);
@@ -57,19 +65,18 @@ class CursoController extends Controller
             ->with('success', 'Curso atualizado com sucesso!');
     }
 
-    public function destroy(Curso $curso) 
+    public function destroy(Curso $curso)
     {
         $curso->delete();
-        
+
         return redirect()->route('cursos.index')
             ->with('success', 'Curso excluído com sucesso!');
     }
+
     public function porCategoria($categoria)
     {
-        // Busca os cursos onde a coluna 'categoria' bate com a URL
         $cursos = Curso::where('categoria', $categoria)->get();
-        
-        // Vamos usar a mesma view (loja.home), mas agora passando apenas os cursos filtrados e o nome da categoria atual
+
         return view('loja.home', compact('cursos', 'categoria'));
     }
 }

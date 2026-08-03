@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VendedoraController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\CursoController;
+use App\Http\Controllers\CarrinhoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,15 +42,20 @@ Route::view('/projetos', 'Projetos.index')->name('projetos.index');
 Route::view('/projetos/novo', 'Projetos.create')->name('projetos.create');
 
 // Carrinho e checkout (RF04)
-Route::post('/carrinho', function () { return back(); })->name('carrinho.add');
-Route::delete('/carrinho/{index}', function ($index) { return back(); })->name('carrinho.remove');
-Route::post('/carrinho/checkout', function () { return redirect()->route('carrinho.sucesso'); })->name('carrinho.checkout');
-Route::view('/carrinho', 'Carrinho.index')->name('carrinho.index');
+Route::get('/carrinho', [CarrinhoController::class, 'index'])->name('carrinho.index');
+Route::post('/carrinho', [CarrinhoController::class, 'add'])->name('carrinho.add');
+Route::delete('/carrinho/{id}', [CarrinhoController::class, 'remove'])->name('carrinho.remove');
+Route::post('/carrinho/checkout', [CarrinhoController::class, 'checkout'])->name('carrinho.checkout');
 Route::view('/carrinho/sucesso', 'Carrinho.sucesso')->name('carrinho.sucesso');
 Route::view('/meus-pedidos', 'Loja.meus_pedidos')->name('meus-pedidos');
 
 // Cursos (RF05, RF06)
-Route::view('/cursos', 'Cursos.index')->name('cursos.index');
+Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
+Route::get('/cursos/novo', [CursoController::class, 'create'])->name('cursos.create');
+Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.store');
+Route::put('/cursos/{curso}', [CursoController::class, 'update'])->name('cursos.update');
+Route::delete('/cursos/{curso}', [CursoController::class, 'destroy'])->name('cursos.destroy');
+Route::get('/cursos/categoria/{categoria}', [CursoController::class, 'porCategoria'])->name('cursos.categoria');
 
 // Perfil público da criadora (RF07, RF08) + avaliações
 Route::get('/criadoras/{id}', function ($id) { return view('Criadoras.perfil'); })->name('criadoras.perfil');
