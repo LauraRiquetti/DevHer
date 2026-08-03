@@ -42,7 +42,7 @@ class CursoController extends Controller
         }
 
         // Interrompe com HTTP 403 caso o perfil do usuário não seja "vendedora"
-        if (Auth::user()->tipo !== 'vendedora') {
+        if (strtolower(Auth::user()->tipo) !== 'vendedora') {
             abort(403, 'Acesso não autorizado. Apenas usuárias do tipo vendedora podem publicar cursos.');
         }
 
@@ -55,12 +55,13 @@ class CursoController extends Controller
     public function store(Request $request)
     {
         // Garante que apenas vendedoras autenticadas executem a ação
-        if (!Auth::check() || Auth::user()->tipo !== 'vendedora') {
-            abort(403, 'Apenas vendedoras podem criar cursos.');
+        if (strtolower(Auth::user()->tipo) !== 'vendedora') {
+            abort(403, 'Acesso não autorizado. Apenas usuárias do tipo vendedora podem publicar cursos.');
         }
 
         // Valida os campos recebidos da requisição
         $dadosValidados = $request->validate([
+            'user_id'   => 'required|exists:users,id',
             'nome'      => 'required|string|max:255',
             'preco'     => 'required|numeric|min:0',
             'descricao' => 'nullable|string',
@@ -75,7 +76,7 @@ class CursoController extends Controller
         Curso::create($dadosValidados);
 
         return redirect()->route('cursos.index')
-            ->with('success', 'Curso cadastrado com sucesso!');
+            ->with('successo', 'Curso cadastrado com sucesso!');
     }
 
     /**

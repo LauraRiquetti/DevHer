@@ -117,6 +117,10 @@
                     <div class="field">
                         <label for="cep">CEP *</label>
                         <input type="text" name="cep" id="cep" placeholder="00000-000" value="{{ old('cep') }}" required>
+                        {{-- Mensagem de erro que será exibida pelo JS --}}
+                        <small id="cep-error" style="color: #FF2D87; display: none; margin-top: 4px; font-weight: 500;">
+                            CEP não encontrado.
+                        </small>
                     </div>
                     <div class="field">
                         <label for="rua">Rua/Logradouro *</label>

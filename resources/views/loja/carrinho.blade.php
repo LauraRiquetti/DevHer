@@ -79,12 +79,14 @@
 
                                             <td class="fw-bold text-dark text-start">{{ $item['nome'] }}</td>
 
-                                            <td class="text-muted">R$ {{ number_format($item['valor'], 2, ',', '.') }}</td>
+                                            {{-- CORREÇÃO: Usando 'preco' com fallback para 'valor' --}}
+                                            <td class="text-muted">R$ {{ number_format($item['preco'] ?? $item['valor'], 2, ',', '.') }}</td>
 
                                             <td class="fw-semibold">{{ $item['quantidade'] }}</td>
 
+                                            {{-- CORREÇÃO: Usando 'preco' com fallback para 'valor' no cálculo --}}
                                             <td class="fw-bold text-success">
-                                                R$ {{ number_format($item['valor'] * $item['quantidade'], 2, ',', '.') }}
+                                                R$ {{ number_format(($item['preco'] ?? $item['valor']) * $item['quantidade'], 2, ',', '.') }}
                                             </td>
 
                                             {{-- Botão de Remoção Individual --}}

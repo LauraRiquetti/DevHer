@@ -22,8 +22,4 @@ class Curso extends Model
     {
         return $this->belongsTo(User::class);
     }
-    protected function venda()
-    {
-        return $this->hasMany(Venda::class);
-    }
 }

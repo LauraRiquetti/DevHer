@@ -37,8 +37,8 @@ class CarrinhoController extends Controller
             $carrinho[$chave] = [
                 'id'         => $item->id,
                 'tipo'       => $tipo,
-                'nome'       => $item->nome,  // Ajuste se na tabela for 'titulo'
-                'valor'      => $item->valor, // Ajuste se na tabela for 'preco'
+                'nome'       => $item->nome, 
+                'preco'      => $item->preco, 
                 'quantidade' => 1,
             ];
         }
@@ -57,7 +57,7 @@ class CarrinhoController extends Controller
 
         // Calcula o valor total do carrinho
         $total = array_reduce($carrinho, function ($acc, $item) {
-            return $acc + ($item['valor'] * $item['quantidade']);
+            return $acc + ($item['preco'] * $item['quantidade']);
         }, 0);
 
         return view('loja.carrinho', compact('carrinho', 'total'));
