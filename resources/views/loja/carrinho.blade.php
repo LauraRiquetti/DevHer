@@ -2,11 +2,11 @@
 
 @section('content')
 {{-- Container flexível com altura mínima para garantir que ocupe a tela --}}
-<div class="container d-flex flex-column" style="min-height: 80vh; padding-top: 3rem; padding-bottom: 3rem;">
+<div class="container d-flex flex-column" style="min-height: 80vh; padding-top: 3rem; padding-bottom: 3rem; max-width: 1140px; margin: 0 auto; padding-left: 24px; padding-right: 24px; display: flex; flex-direction: column;">
     
     {{-- Título Centralizado --}}
-    <div class="w-100 text-center mb-4">
-        <div class="d-inline-flex justify-content-center align-items-center gap-3">
+    <div class="w-100 text-center mb-4" style="width: 100%; text-align: center; margin-bottom: 1.5rem;">
+        <div class="d-inline-flex justify-content-center align-items-center gap-3" style="display: inline-flex; justify-content: center; align-items: center; gap: 0.75rem;">
             <i class="bi bi-cart4 fs-1" style="color: var(--pink-light, #e83e8c);"></i>
             <h2 class="mb-0 fw-bold">Seu Carrinho de Compras</h2>
         </div>
@@ -14,9 +14,9 @@
 
     {{-- Exibição de mensagens de sucesso ou erro --}}
     @if (session('sucesso'))
-        <div class="row justify-content-center w-100 mx-0 mb-4">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="alert alert-success alert-dismissible fade show shadow-sm text-center" role="alert">
+        <div class="row justify-content-center w-100 mx-0 mb-4" style="display: flex; justify-content: center; width: 100%; margin-left: 0; margin-right: 0; margin-bottom: 1.5rem;">
+            <div class="col-12 col-md-8 col-lg-6" style="width: 100%; max-width: 600px;">
+                <div class="alert alert-success alert-dismissible fade show shadow-sm text-center" role="alert" style="text-align: center;">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('sucesso') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>
@@ -25,9 +25,9 @@
     @endif
 
     @if (session('erro'))
-        <div class="row justify-content-center w-100 mx-0 mb-4">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center" role="alert">
+        <div class="row justify-content-center w-100 mx-0 mb-4" style="display: flex; justify-content: center; width: 100%; margin-left: 0; margin-right: 0; margin-bottom: 1.5rem;">
+            <div class="col-12 col-md-8 col-lg-6" style="width: 100%; max-width: 600px;">
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center" role="alert" style="text-align: center;">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('erro') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>
@@ -38,7 +38,8 @@
     {{-- Verificação: Carrinho Vazio no Centro EXATO da Tela --}}
     @if(empty($carrinho))
         {{-- O flex-grow-1 faz essa div ocupar todo o espaço que sobrou, centralizando na vertical e horizontal --}}
-        <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center w-100">
+        <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center w-100"
+             style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; width: 100%;">
             <i class="bi bi-cart-x text-muted mb-4" style="font-size: 6rem;"></i>
             <h3 class="fw-bold mb-3">Seu carrinho está vazio no momento.</h3>
             <p class="text-secondary mb-5 fs-5">Navegue pelos cursos e projetos disponíveis para começar a comprar!</p>
@@ -57,8 +58,8 @@
                             <table class="table align-middle mb-0 table-hover text-center">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-4 text-start">Tipo</th>
-                                        <th class="text-start">Item</th>
+                                        <th class="ps-4">Tipo</th>
+                                        <th>Item</th>
                                         <th>Preço Unitário</th>
                                         <th>Qtd</th>
                                         <th>Subtotal</th>
@@ -69,7 +70,7 @@
                                     @foreach($carrinho as $chave => $item)
                                         <tr>
                                             {{-- Distinção entre Curso e Projeto --}}
-                                            <td class="ps-4 text-start">
+                                            <td class="ps-4">
                                                 @if($item['tipo'] === 'curso')
                                                     <span class="badge rounded-pill bg-info text-dark fw-bold">Curso</span>
                                                 @else
@@ -77,7 +78,7 @@
                                                 @endif
                                             </td>
 
-                                            <td class="fw-bold text-dark text-start">{{ $item['nome'] }}</td>
+                                            <td class="fw-bold text-dark">{{ $item['nome'] }}</td>
 
                                             {{-- CORREÇÃO: Usando 'preco' com fallback para 'valor' --}}
                                             <td class="text-muted">R$ {{ number_format($item['preco'] ?? $item['valor'], 2, ',', '.') }}</td>

@@ -16,7 +16,7 @@
         <!-- Subtítulo de apresentação do projeto -->
         <span class="eyebrow">Feito por, com e para mulheres da tecnologia</span>
         <!-- Título principal da landing page -->
-        <h1>Aprenda, conecte-se e <span class="accent">venda seus projetos</span> em tecnologia.</h1>
+        <h1 class="hero-hover">Aprenda, conecte-se e <span class="accent">venda seus projetos</span> em tecnologia.</h1>
         <!-- Descrição geral da proposta da plataforma -->
         <p>Cursos, mentorias, portfólio e uma comunidade real de mulheres na TI — em um único ecossistema pensado para reduzir a evasão feminina e abrir portas no mercado.</p>
         <!-- Botões de chamada para ação (CTAs) -->
@@ -105,6 +105,20 @@
             </svg>
         </div>
     </div>
+
+    {{-- Efeito simples: o título principal fica colorido ao passar o mouse --}}
+    <style>
+        .hero-hover {
+            transition: color .25s ease;
+        }
+        .hero-hover:hover {
+            color: #FF2D87;
+        }
+        /* O trecho em destaque (accent) muda para um tom levemente mais claro no hover, mantendo contraste */
+        .hero-hover:hover .accent {
+            color: #FF9AC7;
+        }
+    </style>
 </section>
 
 <!-- Seção de apoio / comunidades parceiras -->
@@ -119,6 +133,22 @@
             <span class="chip">ProgramAdas</span>
             <span class="chip">Rails Girls</span>
             <span class="chip">Marias da Tech</span>
+        </div>
+    </div>
+</section>
+
+<!-- Seção do passo a passo do fluxo da aplicação -->
+<section class="how" id="como-funciona">
+    <div class="wrap">
+        <div class="how-head reveal">
+            <span class="eyebrow">Como funciona</span>
+            <h2>Do primeiro acesso à primeira venda.</h2>
+        </div>
+        <div class="how-grid">
+            <div class="how-card reveal"><span class="n">01</span><h4>Cadastro</h4><p>Crie sua conta como cliente ou criadora, informando nome, e-mail e data de nascimento.</p></div>
+            <div class="how-card reveal"><span class="n">02</span><h4>Explore</h4><p>Busque projetos e cursos por categoria e conheça o perfil público de cada criadora.</p></div>
+            <div class="how-card reveal"><span class="n">03</span><h4>Aprenda e produza</h4><p>Avance em cursos e mentorias, publique projetos com arquivos, preço e descrição.</p></div>
+            <div class="how-card reveal"><span class="n">04</span><h4>Conecte e venda</h4><p>Receba avaliações, participe da comunidade e finalize vendas com pagamento integrado.</p></div>
         </div>
     </div>
 </section>
@@ -241,22 +271,6 @@
                 <div class="stat-num" data-count="5">5</div>
                 <div class="stat-label">de taxa sobre vendas no ecossistema</div>
             </div>
-        </div>
-    </div>
-</section>
-
-<!-- Seção do passo a passo do fluxo da aplicação -->
-<section class="how" id="como-funciona">
-    <div class="wrap">
-        <div class="how-head reveal">
-            <span class="eyebrow">Como funciona</span>
-            <h2>Do primeiro acesso à primeira venda.</h2>
-        </div>
-        <div class="how-grid">
-            <div class="how-card reveal"><span class="n">01</span><h4>Cadastro</h4><p>Crie sua conta como cliente ou criadora, informando nome, e-mail e data de nascimento.</p></div>
-            <div class="how-card reveal"><span class="n">02</span><h4>Explore</h4><p>Busque projetos e cursos por categoria e conheça o perfil público de cada criadora.</p></div>
-            <div class="how-card reveal"><span class="n">03</span><h4>Aprenda e produza</h4><p>Avance em cursos e mentorias, publique projetos com arquivos, preço e descrição.</p></div>
-            <div class="how-card reveal"><span class="n">04</span><h4>Conecte e venda</h4><p>Receba avaliações, participe da comunidade e finalize vendas com pagamento integrado.</p></div>
         </div>
     </div>
 </section>
