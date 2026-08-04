@@ -1,7 +1,10 @@
 <header class="site-header">
     <nav class="navbar">
-        <a href="{{ url('/') }}" class="logo"><span class="dot"></span>DevHer</a>
-
+        <a href="{{ url('/') }}" class="logo">
+            {{-- Persona/mascote do DevHer, ao lado do nome, igual ao site da Magalu --}}
+            <img src="{{ asset('images/persona-devher.png') }}" alt="Persona DevHer" class="logo-persona">
+            <span class="dot"></span>DevHer
+        </a>
         <ul class="nav-links">
             <li><a href="{{ url('/#comunidade') }}">Comunidade</a></li>
             <li><a href="{{ route('cursos.index') ?? '#' }}">Cursos</a></li>
@@ -9,7 +12,6 @@
             <li><a href="{{ url('/#como-funciona') }}">Como funciona</a></li>
             <li><a href="{{ url('/#jornada') }}">Comece sua jornada</a></li>
         </ul>
-
         <div class="nav-cta" style="display: flex; align-items: center; gap: 15px;">
             
             {{-- Ícone do Carrinho de Compras --}}
@@ -21,7 +23,6 @@
                     </span>
                 @endif
             </a>
-
             {{-- Se o usuário estiver autenticado no sistema --}}
             @auth
                 {{-- Link dinâmico: Verifica se a role é 'vendedora' para mandar para a rota certa --}}
@@ -36,12 +37,10 @@
                         Olá, {{ Auth::user()->name }}
                     </span>
                 </a>
-
                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                     @csrf
                     <button type="submit" class="btn btn-ghost btn-sm">Sair</button>
                 </form>
-
             {{-- Se for um visitante não logado --}}
             @else
                 <a href="{{ route('login') }}" class="btn btn-ghost" style="padding:10px 18px;">Entrar</a>
@@ -51,3 +50,20 @@
         <button class="nav-toggle" aria-label="Abrir menu">☰</button>
     </nav>
 </header>
+
+{{-- Estilo da persona no logo, escopado só ao cabeçalho para não afetar o .logo do rodapé --}}
+<style>
+    .site-header .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .site-header .logo-persona {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        object-fit: cover;
+        display: block;
+        flex-shrink: 0;
+    }
+</style>

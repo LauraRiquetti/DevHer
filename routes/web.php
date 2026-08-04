@@ -106,6 +106,11 @@ Route::post('/pagamento/notification', [PagamentoController::class, 'notificacao
 Route::post('/carrinho/adicionar/{tipo}/{id}', [App\Http\Controllers\CarrinhoController::class, 'adicionar'])->name('carrinho.add');
 Route::post('/carrinho/adicionar/{tipo}/{id}', [CarrinhoController::class, 'adicionar'])->name('carrinho.add');
 
+// Página de detalhes do curso (pública). Importante: fica DEPOIS de '/cursos/novo'
+// (lá em cima, dentro do grupo 'auth') para que '/cursos/novo' continue sendo
+// reconhecida corretamente e não seja capturada por esse parâmetro genérico {curso}.
+Route::get('/cursos/{curso}', [CursoController::class, 'show'])->name('cursos.show');
+
 
 /*
 |--------------------------------------------------------------------------
