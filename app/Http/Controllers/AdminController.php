@@ -13,6 +13,9 @@ class AdminController extends Controller
     /**
      * Dashboard Principal com Métricas Reais
      */
+    /**
+     * Dashboard Principal com Métricas Reais
+     */
     public function dashboard()
     {
         // 1. KPIs com dados reais do Banco de Dados
@@ -43,14 +46,14 @@ class AdminController extends Controller
             ],
         ];
 
-        // 2. Busca conteúdos reais pendentes de moderação (Se houver coluna de status)
-        // Caso a coluna 'status' ainda não exista na tabela, buscamos os últimos projetos como exemplo
-        $projetosPendentes = Projeto::with('vendedora')->latest()->take(5)->get()->map(function ($proj) {
+        // 2. Busca conteúdos reais pendentes de moderação
+        // CORREÇÃO: Trocado 'vendedora' por 'user' e 'nome' por 'name'
+        $projetosPendentes = Projeto::with('user')->latest()->take(5)->get()->map(function ($proj) {
             return [
                 'id'     => $proj->id,
                 'tipo'   => 'Projeto',
                 'titulo' => $proj->titulo ?? $proj->nome,
-                'autora' => $proj->vendedora->nome ?? 'Vendedora',
+                'autora' => $proj->user->name ?? 'Vendedora', // Alterado aqui!
             ];
         });
 

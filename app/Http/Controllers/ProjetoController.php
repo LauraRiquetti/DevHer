@@ -38,6 +38,11 @@ class ProjetoController extends Controller
      */
     public function create()
     {
+        if (!in_array(auth()->user()->role, ['vendedora', 'admin'])) {
+            return redirect()->route('projetos.index')
+                ->with('erro', 'Você não tem permissão para publicar projetos.');
+        }
+
         return view('projetos.create');
     }
 
@@ -46,6 +51,11 @@ class ProjetoController extends Controller
      */
     public function store(Request $request)
     {
+        // Trava de segurança: impede o envio do formulário por clientes
+        if (!in_array(auth()->user()->role, ['vendedora', 'admin'])) {
+            return redirect()->route('projetos.index')
+                ->with('erro', 'Você não tem permissão para publicar projetos.');
+        }
         // 1. Validação adaptada aos campos do formulário e migration
         $request->validate([
             'nome'        => 'required|string|max:255',
