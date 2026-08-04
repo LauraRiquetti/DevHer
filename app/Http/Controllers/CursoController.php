@@ -32,6 +32,25 @@ class CursoController extends Controller
     }
 
     /**
+     * Exibe os detalhes de um curso específico
+     */
+    public function show(Curso $curso)
+    {
+        // Carrega a relação com a usuária que publicou o curso (evita consulta repetida na view)
+        $curso->loadMissing('user');
+
+        // Mesma lógica de cálculo de idade usada em index(), necessária para
+        // decidir se o conteúdo 18+ pode ser exibido para esta usuária
+        $idadeUsuaria = null;
+
+        if (Auth::check() && Auth::user()->data_nascimento) {
+            $idadeUsuaria = Carbon::parse(Auth::user()->data_nascimento)->age;
+        }
+
+        return view('cursos.show', compact('curso', 'idadeUsuaria'));
+    }
+
+    /**
      * Exibe o formulário de cadastro de cursos (apenas para vendedoras)
      */
     public function create()

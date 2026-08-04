@@ -8,33 +8,131 @@
 @section('content')
 
 <!-- Seção principal da página (Hero Banner) -->
-<section class="hero">
-    <!-- Elementos visuais de iluminação/brilho estilizados via CSS -->
-    <div class="glow glow-1"></div>
-    <div class="glow glow-2"></div>
-    <div class="wrap hero-inner">
-        <!-- Subtítulo de apresentação do projeto -->
-        <span class="eyebrow">Feito por, com e para mulheres da tecnologia</span>
-        <!-- Título principal da landing page -->
-        <h1 class="hero-hover">Aprenda, conecte-se e <span class="accent">venda seus projetos</span> em tecnologia.</h1>
-        <!-- Descrição geral da proposta da plataforma -->
-        <p>Cursos, mentorias, portfólio e uma comunidade real de mulheres na TI — em um único ecossistema pensado para reduzir a evasão feminina e abrir portas no mercado.</p>
-        <!-- Botões de chamada para ação (CTAs) -->
-        <div class="hero-ctas">
-            <!-- Verifica se o usuário está autenticado na sessão -->
-            @auth
-                {{-- Exibe O BOTÃO SOMENTE se for Admin --}}
-                @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
-                    <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Acessar Painel Admin</a>
-                @endif
-            @else
-                <!-- Caso seja um visitante não logado, exibe a opção de cadastro -->
-                <a href="{{ route('cadastro') }}" class="btn btn-primary">Comece grátis</a>
-            @endauth
-            <!-- Âncora para rolar a página até a seção informativa -->
-            <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
+<section class="hero hero-with-photo">
+    <div class="hero-top">
+        {{-- Foto de fundo (mulher programando) com degradê rosa por cima, texto à esquerda --}}
+        <div class="hero-photo-layer">
+            <img src="{{ asset('images/hero-mulher-programando.jpg') }}" alt="Mulher programando" class="hero-photo-img">
+            <div class="hero-photo-gradient"></div>
+        </div>
+
+        <!-- Elementos visuais de iluminação/brilho estilizados via CSS -->
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="wrap hero-inner hero-inner-left">
+            <!-- Subtítulo de apresentação do projeto -->
+            <span class="eyebrow">Feito por, com e para mulheres da tecnologia</span>
+            <!-- Título principal da landing page -->
+            <h1 class="hero-hover">Aprenda, conecte-se e <span class="accent">venda seus projetos</span> em tecnologia.</h1>
+            <!-- Descrição geral da proposta da plataforma -->
+            <p>Cursos, mentorias, portfólio e uma comunidade real de mulheres na TI — em um único ecossistema pensado para reduzir a evasão feminina e abrir portas no mercado.</p>
+            <!-- Botões de chamada para ação (CTAs) -->
+            <div class="hero-ctas">
+                <!-- Verifica se o usuário está autenticado na sessão -->
+                @auth
+                    {{-- Exibe O BOTÃO SOMENTE se for Admin --}}
+                    @if(auth()->user()->role === 'admin' || auth()->user()->is_admin)
+                        <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Acessar Painel Admin</a>
+                    @endif
+                @else
+                    <!-- Caso seja um visitante não logado, exibe a opção de cadastro -->
+                    <a href="{{ route('cadastro') }}" class="btn btn-primary">Comece grátis</a>
+                @endauth
+                <!-- Âncora para rolar a página até a seção informativa -->
+                <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
+            </div>
         </div>
     </div>
+
+    {{-- Estilo do banner com foto de fundo + degradê rosa --}}
+    <style>
+        .hero-top {
+            position: relative;
+            overflow: hidden;
+            min-height: 640px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .hero-photo-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .hero-photo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 22%;
+            display: block;
+        }
+        /* Degradê: preto sólido atrás do texto (esquerda), dissolvendo em rosa
+           até revelar a foto sem filtro do lado direito da tela */
+        .hero-photo-gradient {
+            position: absolute;
+            inset: 0;
+            background:
+                /* Camada 1: some suavemente perto da borda inferior, escondendo o recorte da foto */
+                linear-gradient(
+                    180deg,
+                    transparent 0%,
+                    transparent 72%,
+                    #050507 96%
+                ),
+                /* Camada 2: degradê da esquerda (preto sólido) pra direita (foto revelada) */
+                linear-gradient(
+                    90deg,
+                    #050507 0%,
+                    #050507 16%,
+                    rgba(5, 5, 7, 0.94) 30%,
+                    rgba(255, 45, 135, 0.55) 45%,
+                    rgba(255, 45, 135, 0.22) 62%,
+                    rgba(255, 45, 135, 0.05) 78%,
+                    transparent 92%
+                );
+        }
+        .hero-top .hero-inner {
+            position: relative;
+            z-index: 1;
+        }
+        .hero-top .glow {
+            z-index: 1;
+        }
+        .hero-inner-left {
+            position: relative !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            transform: none !important;
+            text-align: left;
+            max-width: 620px;
+            width: 100%;
+            margin: 0 !important;
+        }
+        .hero-inner-left .hero-ctas {
+            justify-content: flex-start;
+        }
+        /* Em telas menores a foto vira um pano de fundo geral, com degradê de cima pra baixo */
+        @media (max-width: 900px) {
+            .hero-photo-gradient {
+                background: linear-gradient(
+                    180deg,
+                    #050507 0%,
+                    #050507 50%,
+                    rgba(5, 5, 7, 0.88) 68%,
+                    rgba(255, 45, 135, 0.4) 82%,
+                    #050507 100%
+                );
+            }
+            .hero-inner-left {
+                max-width: 100%;
+                text-align: center;
+            }
+            .hero-inner-left .hero-ctas {
+                justify-content: center;
+            }
+        }
+    </style>
 
     {{-- Constelação Dinâmica com usuárias do Banco --}}
     <div class="wrap">

@@ -62,17 +62,20 @@
                 @endphp
 
                 <div class="proj-card" style="{{ $bloqueado ? 'opacity:.55;' : '' }}">
-                    <div class="proj-thumb">
-                        @if($curso->imagem)
-                            <img src="{{ $curso->imagem }}" alt="{{ $curso->nome }}" style="width:100%; height:100%; object-fit:cover;">
+                    {{-- Miniatura + título clicáveis, levando para a página de detalhes do curso --}}
+                    <a href="{{ route('cursos.show', $curso->id) }}" style="display:block; text-decoration:none; color:inherit;">
+                        <div class="proj-thumb">
+                            @if($curso->imagem)
+                                <img src="{{ $curso->imagem }}" alt="{{ $curso->nome }}" style="width:100%; height:100%; object-fit:cover;">
+                            @endif
+                        </div>
+
+                        @if($curso->categoria)
+                            <span class="categoria" style="text-transform: capitalize;">{{ $curso->categoria }}</span>
                         @endif
-                    </div>
 
-                    @if($curso->categoria)
-                        <span class="categoria" style="text-transform: capitalize;">{{ $curso->categoria }}</span>
-                    @endif
-
-                    <h4>{{ $curso->nome }}</h4>
+                        <h4>{{ $curso->nome }}</h4>
+                    </a>
                     <span class="autora">por {{ $curso->user->name ?? 'Autora desconhecida' }}</span>
 
                     <span class="price">
@@ -95,6 +98,15 @@
                         <p style="font-size:12px;color:var(--muted-2);margin-top:10px;">
                             Este curso é liberado apenas para usuárias com 18 anos ou mais.
                         </p>
+                        <button class="btn btn-ghost btn-sm btn-block" disabled style="opacity:0.6; cursor:not-allowed; margin-top:12px;">
+                            Indisponível
+                        </button>
+                    @else
+                        {{-- Mesmo padrão de rota usado no marketplace, trocando 'tipo' para 'curso' --}}
+                        <form method="POST" action="{{ route('carrinho.add', ['tipo' => 'curso', 'id' => $curso->id]) }}" style="margin-top:12px;">
+                            @csrf
+                            <button type="submit" class="btn btn-ghost btn-sm btn-block">Adicionar ao carrinho</button>
+                        </form>
                     @endif
                 </div>
             @empty
