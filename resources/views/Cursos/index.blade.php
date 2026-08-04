@@ -26,7 +26,7 @@
         {{-- Toolbar de Filtro e Busca --}}
         <form method="GET" action="{{ route('cursos.index') }}" class="table-toolbar">
             <input type="text" name="busca" placeholder="Buscar curso..." value="{{ request('busca') }}">
-            
+
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <label class="chip" style="cursor:pointer;">
                     <input type="radio" name="filtro" value="" style="display:none;"
@@ -50,56 +50,134 @@
             @endauth
         </form>
 
-        {{-- Lista de Cursos --}}
-        <div style="max-width:760px; margin: 32px auto 0 auto;">
+        {{-- Grid de Cursos (mesma estrutura visual do Marketplace) --}}
+        <div class="proj-grid" style="margin-top:32px;">
             @forelse ($cursos as $curso)
-                @php 
+                @php
                     $isRestrito = isset($curso->is_18plus) ? $curso->is_18plus : ($curso->categoria === '18+');
-                    $bloqueado = $isRestrito && ($idadeUsuaria === null || $idadeUsuaria < 18); 
+                    $bloqueado = $isRestrito && ($idadeUsuaria === null || $idadeUsuaria < 18);
                 @endphp
 
-                <div class="course-row" style="{{ $bloqueado ? 'opacity:.55;' : '' }}">
-                    <div class="course-thumb">
-                        {{ Str::upper(Str::substr($curso->nome, 0, 2)) }}
-                    </div>
-                    <div>
-                        <h4>{{ $curso->nome }}</h4>
-                        <span>
-                            @if(($curso->preco ?? 0) == 0)
-                                Gratuito
-                            @else
-                                R$ {{ number_format($curso->preco, 2, ',', '.') }}
-                            @endif
-                            @if($curso->duracao)
-                                · {{ $curso->duracao }}
-                            @endif
-                        </span>
+                <div class="proj-card" style="{{ $bloqueado ? 'opacity:.55;' : '' }}">
+                    <div class="proj-thumb">
+                        @if($curso->imagem)
+                            <img src="{{ $curso->imagem }}" alt="{{ $curso->nome }}" style="width:100%; height:100%; object-fit:cover;">
+                        @endif
                     </div>
 
-                    @if ($isRestrito)
-                        <span class="badge-18">18+</span>
-                    @else
-                        <span class="badge-free">Livre</span>
+                    @if($curso->categoria)
+                        <span class="categoria" style="text-transform: capitalize;">{{ $curso->categoria }}</span>
+                    @endif
+
+                    <h4>{{ $curso->nome }}</h4>
+                    <span class="autora">por {{ $curso->user->name ?? 'Autora desconhecida' }}</span>
+
+                    <span class="price">
+                        @if(($curso->preco ?? 0) == 0)
+                            Gratuito
+                        @else
+                            R$ {{ number_format($curso->preco, 2, ',', '.') }}
+                        @endif
+                    </span>
+
+                    <div style="margin-top:10px;">
+                        @if ($isRestrito)
+                            <span class="badge-18">18+</span>
+                        @else
+                            <span class="badge-free">Livre</span>
+                        @endif
+                    </div>
+
+                    @if ($bloqueado)
+                        <p style="font-size:12px;color:var(--muted-2);margin-top:10px;">
+                            Este curso é liberado apenas para usuárias com 18 anos ou mais.
+                        </p>
                     @endif
                 </div>
-
-                @if ($bloqueado)
-                    <p style="font-size:12px;color:var(--muted-2);margin:-6px 0 16px 66px;">
-                        Este curso é liberado apenas para usuárias com 18 anos ou mais.
-                    </p>
-                @endif
             @empty
-                <p style="color:var(--muted); text-align:center; padding: 32px 0;">
-                    Nenhum curso encontrado para este filtro.
-                </p>
+                <p style="color:var(--muted);">Nenhum curso encontrado para este filtro.</p>
             @endforelse
         </div>
 
         {{-- Paginação --}}
         @if (method_exists($cursos, 'links'))
-            <div style="margin-top:32px; text-align:center;">
+            {{-- A view padrão do Laravel usa classes do Tailwind (ex: sm:hidden) que não existem no
+                 CSS deste projeto. Sem Tailwind, os dois blocos de navegação (mobile e desktop) ficam
+                 visíveis ao mesmo tempo, exibindo texto solto como "« Previous" / "Next »".
+                 O bloco abaixo corrige isso via CSS, sem precisar de uma view de paginação separada. --}}
+            <div class="cursos-pagination" style="margin-top:32px;">
                 {{ $cursos->links() }}
             </div>
+
+            <style>
+                /* Esconde a versão simplificada (mobile) da paginação padrão do Laravel,
+                   que só existia por causa da classe Tailwind "sm:hidden" (inerte sem Tailwind) */
+                .cursos-pagination nav[role="navigation"] > div[class*="sm:hidden"] {
+                    display: none !important;
+                }
+
+                /* Exibe sempre a versão completa (com números de página), que ficava
+                   escondida pela classe Tailwind "hidden" (também inerte sem Tailwind) */
+                .cursos-pagination nav[role="navigation"] > div.hidden {
+                    display: flex !important;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                }
+
+                .cursos-pagination nav[role="navigation"] span.relative {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    flex-wrap: wrap;
+                }
+
+                /* Texto "Showing X to Y of Z results" */
+                .cursos-pagination nav[role="navigation"] p {
+                    margin: 0;
+                    font-size: 0.85rem;
+                    color: var(--muted, #6b7280);
+                }
+
+                /* Botões de página (números e setas anterior/próxima) */
+                .cursos-pagination nav[role="navigation"] a,
+                .cursos-pagination nav[role="navigation"] span[aria-current] span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 38px;
+                    height: 38px;
+                    padding: 0 10px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(255, 45, 135, 0.25);
+                    background: #fff;
+                    color: #1c1c1c;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    text-decoration: none;
+                    transition: all .2s ease;
+                }
+
+                .cursos-pagination nav[role="navigation"] a:hover {
+                    border-color: #FF2D87;
+                    color: #FF2D87;
+                    background: rgba(255, 45, 135, 0.06);
+                }
+
+                /* Página atual, destacada em rosa */
+                .cursos-pagination nav[role="navigation"] span[aria-current] span {
+                    background: #FF2D87;
+                    border-color: #FF2D87;
+                    color: #fff;
+                    cursor: default;
+                }
+
+                .cursos-pagination nav[role="navigation"] svg {
+                    width: 16px;
+                    height: 16px;
+                }
+            </style>
         @endif
 
     </div>

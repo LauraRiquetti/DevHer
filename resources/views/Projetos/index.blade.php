@@ -84,9 +84,83 @@
         </div>
 
         {{-- Paginação --}}
-        <div style="margin-top:32px;">
+        {{-- A view padrão do Laravel usa classes do Tailwind (ex: sm:hidden) que não existem no
+             CSS deste projeto. Sem Tailwind, os dois blocos de navegação (mobile e desktop) ficam
+             visíveis ao mesmo tempo, e é por isso que "« Previous" / "Next »" apareciam soltos na tela.
+             O bloco abaixo corrige isso via CSS, sem precisar de uma view de paginação separada. --}}
+        <div class="proj-pagination" style="margin-top:32px;">
             {{ $projetos->links() }}
         </div>
+
+        <style>
+            /* Esconde a versão simplificada (mobile) da paginação padrão do Laravel,
+               que só existia por causa da classe Tailwind "sm:hidden" (inerte sem Tailwind) */
+            .proj-pagination nav[role="navigation"] > div[class*="sm:hidden"] {
+                display: none !important;
+            }
+
+            /* Exibe sempre a versão completa (com números de página), que ficava
+               escondida pela classe Tailwind "hidden" (também inerte sem Tailwind) */
+            .proj-pagination nav[role="navigation"] > div.hidden {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .proj-pagination nav[role="navigation"] span.relative {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                flex-wrap: wrap;
+            }
+
+            /* Texto "Showing X to Y of Z results" */
+            .proj-pagination nav[role="navigation"] p {
+                margin: 0;
+                font-size: 0.85rem;
+                color: var(--muted, #6b7280);
+            }
+
+            /* Botões de página (números e setas anterior/próxima) */
+            .proj-pagination nav[role="navigation"] a,
+            .proj-pagination nav[role="navigation"] span[aria-current] span {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 38px;
+                height: 38px;
+                padding: 0 10px;
+                border-radius: 8px;
+                border: 1px solid rgba(255, 45, 135, 0.25);
+                background: #fff;
+                color: #1c1c1c;
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all .2s ease;
+            }
+
+            .proj-pagination nav[role="navigation"] a:hover {
+                border-color: #FF2D87;
+                color: #FF2D87;
+                background: rgba(255, 45, 135, 0.06);
+            }
+
+            /* Página atual, destacada em rosa */
+            .proj-pagination nav[role="navigation"] span[aria-current] span {
+                background: #FF2D87;
+                border-color: #FF2D87;
+                color: #fff;
+                cursor: default;
+            }
+
+            .proj-pagination nav[role="navigation"] svg {
+                width: 16px;
+                height: 16px;
+            }
+        </style>
 
     </div>
 </section>
