@@ -72,12 +72,12 @@
             position: absolute;
             inset: 0;
             background:
-                /* Camada 1: some suavemente perto da borda inferior, escondendo o recorte da foto */
+                /* Camada 1: vira preto sólido logo na metade da altura, sem deixar resíduo visível da foto embaixo */
                 linear-gradient(
                     180deg,
                     transparent 0%,
-                    transparent 72%,
-                    #050507 96%
+                    transparent 45%,
+                    #050507 68%
                 ),
                 /* Camada 2: degradê da esquerda (preto sólido) pra direita (foto revelada) */
                 linear-gradient(
@@ -134,6 +134,76 @@
         }
     </style>
 
+    {{-- Constelação Dinâmica com usuárias do Banco --}}
+    <div class="wrap">
+        <div class="constellation reveal">
+            <!-- Gráfico vetorial interativo de nós/conexões representando a rede da comunidade -->
+            <svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <!-- Definição de gradiente de cor para os pontos (nós) da constelação -->
+                    <radialGradient id="nodeGrad" cx="50%" cy="50%" r="60%">
+                        <stop offset="0%" stop-color="#FF9AC7"/>
+                        <stop offset="100%" stop-color="#FF2D87"/>
+                    </radialGradient>
+                </defs>
+                <!-- Grupo de linhas que conectam as posições dos pontos no SVG -->
+                <g stroke="rgba(255,45,135,0.28)" stroke-width="1">
+                    <line x1="150" y1="90" x2="330" y2="150"/>
+                    <line x1="330" y1="150" x2="520" y2="80"/>
+                    <line x1="330" y1="150" x2="470" y2="260"/>
+                    <line x1="470" y1="260" x2="650" y2="200"/>
+                    <line x1="650" y1="200" x2="800" y2="110"/>
+                    <line x1="470" y1="260" x2="620" y2="320"/>
+                    <line x1="150" y1="90" x2="230" y2="260"/>
+                    <line x1="230" y1="260" x2="470" y2="260"/>
+                    <line x1="520" y1="80" x2="650" y2="200"/>
+                    <line x1="800" y1="110" x2="720" y2="60"/>
+                </g>
+                <!-- Desenho dos pontos (círculos) usando o gradiente predefinido -->
+                <g>
+                    <circle cx="150" cy="90" r="7" fill="url(#nodeGrad)"/>
+                    <circle cx="330" cy="150" r="10" fill="url(#nodeGrad)"/>
+                    <circle cx="520" cy="80" r="6" fill="url(#nodeGrad)"/>
+                    <circle cx="470" cy="260" r="9" fill="url(#nodeGrad)"/>
+                    <circle cx="650" cy="200" r="7" fill="url(#nodeGrad)"/>
+                    <circle cx="800" cy="110" r="6" fill="url(#nodeGrad)"/>
+                    <circle cx="620" cy="320" r="6" fill="url(#nodeGrad)"/>
+                    <circle cx="230" cy="260" r="6" fill="url(#nodeGrad)"/>
+                    <circle cx="720" cy="60" r="5" fill="url(#nodeGrad)"/>
+                </g>
+                <!-- Rótulos de texto que exibem os nomes das vendedoras -->
+                <g class="node-label">
+                    @php
+                        // Matriz de coordenadas (X, Y) fixas para posicionar os usernames dentro do SVG
+                        $coordenadas = [
+                            ['x' => 330, 'y' => 130],
+                            ['x' => 470, 'y' => 245],
+                            ['x' => 650, 'y' => 185],
+                            ['x' => 150, 'y' => 75],
+                            ['x' => 800, 'y' => 95],
+                            ['x' => 230, 'y' => 280],
+                        ];
+                    @endphp
+                    <!-- Itera pela lista de vendedoras trazida do controller -->
+                    @forelse($vendedoras as $idx => $vendedora)
+                        <!-- Garante que exista uma coordenada configurada para a posição atual -->
+                        @if(isset($coordenadas[$idx]))
+                            <text x="{{ $coordenadas[$idx]['x'] }}" y="{{ $coordenadas[$idx]['y'] }}">
+                                <!-- Converte o nome para formato slug de @arroba (ex: @mariana-dev) com fallback de nome -->
+                                @ {{ Str::slug($vendedora->name ?? $vendedora->nome ?? 'desenvolvedora') }}
+                            </text>
+                        @endif
+                    @empty
+                        <!-- Nomes estáticos exibidos caso não haja vendedoras cadastradas no banco -->
+                        <text x="330" y="130">@mariana.dev</text>
+                        <text x="470" y="245">@ana.backend</text>
+                        <text x="650" y="185">@lu.uxui</text>
+                    @endforelse
+                </g>
+            </svg>
+        </div>
+    </div>
+
     {{-- Efeito simples: o título principal fica colorido ao passar o mouse --}}
     <style>
         .hero-hover {
@@ -155,12 +225,12 @@
         <p>Redes e iniciativas que caminham com a gente</p>
         <!-- Chips/tags com nomes das comunidades representadas -->
         <div class="apoio-row">
-            <span class="chip">PyLadies</span>
-            <span class="chip">Women Techmakers</span>
-            <span class="chip">Meninas Digitais</span>
-            <span class="chip">ProgramAdas</span>
-            <span class="chip">Rails Girls</span>
-            <span class="chip">Marias da Tech</span>
+            <a href="{{ route('comunidades.show', 'pyladies') }}" class="chip" style="text-decoration:none; cursor:pointer;">PyLadies</a>
+            <a href="{{ route('comunidades.show', 'women-techmakers') }}" class="chip" style="text-decoration:none; cursor:pointer;">Women Techmakers</a>
+            <a href="{{ route('comunidades.show', 'meninas-digitais') }}" class="chip" style="text-decoration:none; cursor:pointer;">Meninas Digitais</a>
+            <a href="{{ route('comunidades.show', 'programadas') }}" class="chip" style="text-decoration:none; cursor:pointer;">ProgramAdas</a>
+            <a href="{{ route('comunidades.show', 'rails-girls') }}" class="chip" style="text-decoration:none; cursor:pointer;">Rails Girls</a>
+            <a href="{{ route('comunidades.show', 'marias-da-tech') }}" class="chip" style="text-decoration:none; cursor:pointer;">Marias da Tech</a>
         </div>
     </div>
 </section>
