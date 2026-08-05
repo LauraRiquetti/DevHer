@@ -111,6 +111,10 @@ Route::post('/carrinho/adicionar/{tipo}/{id}', [CarrinhoController::class, 'adic
 // reconhecida corretamente e não seja capturada por esse parâmetro genérico {curso}.
 Route::get('/cursos/{curso}', [CursoController::class, 'show'])->name('cursos.show');
 
+// Página de detalhes do projeto (pública). Mesmo motivo acima: fica DEPOIS de
+// '/projetos/novo' para essa rota específica continuar funcionando normalmente.
+Route::get('/projetos/{projeto}', [ProjetoController::class, 'show'])->name('projetos.show');
+
 
 /*
 |--------------------------------------------------------------------------

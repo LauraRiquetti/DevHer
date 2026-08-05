@@ -46,10 +46,7 @@
             </div>
 
             @auth
-                {{-- Exibe o botão apenas se o usuário for 'vendedora' ou 'admin' --}}
-                @if(in_array(auth()->user()->role, ['vendedora', 'admin']))
-                    <a href="{{ route('projetos.create') }}" class="btn btn-primary btn-sm">+ Publicar projeto</a>
-                @endif
+                <a href="{{ route('projetos.create') }}" class="btn btn-primary btn-sm">+ Publicar projeto</a>
             @endauth
         </form>
 
@@ -57,26 +54,34 @@
         <div class="proj-grid" style="margin-top:32px;">
             @forelse ($projetos as $projeto)
                 <div class="proj-card">
-                    <div class="proj-thumb">
-                        @if($projeto->imagem)
-                            <img src="{{ $projeto->imagem }}" alt="{{ $projeto->nome }}" style="width:100%; height:100%; object-fit:cover;">
-                        @endif
-                    </div>
+                    {{-- Miniatura + título clicáveis, levando para a página de detalhes do projeto --}}
+                    <a href="{{ route('projetos.show', $projeto->id) }}" style="display:block; text-decoration:none; color:inherit;">
+                        <div class="proj-thumb">
+                            @if($projeto->imagem)
+                                <img src="{{ $projeto->imagem }}" alt="{{ $projeto->nome }}" style="width:100%; height:100%; object-fit:cover;">
+                            @endif
+                        </div>
 
-                    <span class="categoria" style="text-transform: capitalize;">{{ $projeto->status }}</span>
-                    <h4>{{ $projeto->nome }}</h4>
+                        <span class="categoria" style="text-transform: capitalize;">{{ $projeto->status }}</span>
+                        <h4>{{ $projeto->nome }}</h4>
+                    </a>
                     <span class="autora">por {{ $projeto->user->name ?? 'Autor Desconhecido' }}</span>
                     <span class="price">R$ {{ number_format($projeto->preco, 2, ',', '.') }}</span>
+
+                    {{-- Botão "Saiba mais": leva para a página de descrição do projeto --}}
+                    <a href="{{ route('projetos.show', $projeto->id) }}" class="btn btn-primary btn-sm btn-block" style="margin-top:12px;">
+                        Saiba mais
+                    </a>
 
                     @if($projeto->status === 'disponivel')
                         {{-- A CORREÇÃO ESTÁ NESTA LINHA ABAIXO: --}}
                         {{-- Adicionamos o array com 'tipo' => 'projeto' e o 'id' --}}
-                        <form method="POST" action="{{ route('carrinho.add', ['tipo' => 'projeto', 'id' => $projeto->id]) }}" style="margin-top:12px;">
+                        <form method="POST" action="{{ route('carrinho.add', ['tipo' => 'projeto', 'id' => $projeto->id]) }}" style="margin-top:10px;">
                             @csrf
                             <button type="submit" class="btn btn-ghost btn-sm btn-block">Adicionar ao carrinho</button>
                         </form>
                     @else
-                        <button class="btn btn-ghost btn-sm btn-block" disabled style="opacity:0.6; cursor:not-allowed; margin-top:12px;">
+                        <button class="btn btn-ghost btn-sm btn-block" disabled style="opacity:0.6; cursor:not-allowed; margin-top:10px;">
                             Indisponível
                         </button>
                     @endif

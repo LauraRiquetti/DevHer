@@ -34,6 +34,17 @@ class ProjetoController extends Controller
     }
 
     /**
+     * Exibe os detalhes de um projeto específico
+     */
+    public function show(Projeto $projeto)
+    {
+        // Carrega a relação com a usuária que publicou o projeto (evita consulta repetida na view)
+        $projeto->loadMissing('user');
+
+        return view('projetos.show', compact('projeto'));
+    }
+
+    /**
      * Exibe o formulário de criação de um novo projeto
      */
     public function create()
