@@ -136,7 +136,7 @@ class AuthController extends Controller
         // Autentica o novo usuário e redireciona
         Auth::login($user);
 
-        return redirect('/login')->with('success', 'Cadastro realizado com sucesso.');
+        return redirect()->route('home')->with('success', 'Cadastro realizado com sucesso! Seja bem-vinda.');
     }
 
     /**
