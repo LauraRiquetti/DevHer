@@ -275,33 +275,68 @@
 </section>
 
 {{-- Seção de Estatísticas do Ecossistema --}}
+{{-- Seção de Estatísticas do Ecossistema --}}
+<section class="stats">
+    {{-- CSS para garantir que % apareça APENAS na taxa da plataforma --}}
+    <style>
+        .stats-grid .stat-num::after {
+            content: "" !important; /* Remove o % dos contadores normais */
+        }
+        .stats-grid .stat-percent::after {
+            content: "%" !important; /* Adiciona o % apenas na taxa */
+        }
+    </style>
+    
+{{-- Seção de Estatísticas do Ecossistema --}}
 <section class="stats">
     <div class="wrap">
         <h2 class="reveal">Cada número representa uma trajetória que continuou.</h2>
         <div class="stats-grid">
+            
             <!-- Total de criadoras cadastradas -->
             <div class="reveal">
-                <div class="stat-num" data-count="{{ $totalCriadoras > 0 ? $totalCriadoras : 18 }}">{{ $totalCriadoras }}</div>
+                <div class="stat-num stat-clean" data-count="{{ $totalCriadoras > 0 ? $totalCriadoras : 18 }}">{{ $totalCriadoras }}</div>
                 <div class="stat-label">criadoras cadastradas na plataforma</div>
             </div>
+
             <!-- Total de projetos publicados no marketplace -->
             <div class="reveal">
-                <div class="stat-num" data-count="{{ $totalProjetos > 0 ? $totalProjetos : 10 }}">{{ $totalProjetos }}</div>
+                <div class="stat-num stat-clean" data-count="{{ $totalProjetos > 0 ? $totalProjetos : 10 }}">{{ $totalProjetos }}</div>
                 <div class="stat-label">projetos ativos no marketplace</div>
             </div>
+
             <!-- Indicador estático de disponibilidade de conteúdo -->
             <div class="reveal">
                 <div class="stat-static" style="font-size: var(--stat-size, 3rem); font-weight: 800; color: var(--pink-main, #ff2d87);">24h</div>
                 <div class="stat-label">de conteúdo disponível</div>
             </div>
-            <!-- Indicador estático de porcentagem da taxa da plataforma -->
+
+            <!-- Indicador estático de porcentagem da taxa da plataforma (este sim mantém o %) -->
             <div class="reveal">
                 <div class="stat-num" data-count="5">5</div>
                 <div class="stat-label">de taxa sobre vendas no ecossistema</div>
             </div>
+
         </div>
     </div>
 </section>
+
+{{-- Script para remover o % que o JS do tema injeta automaticamente --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cleanElements = document.querySelectorAll('.stat-clean');
+        
+        cleanElements.forEach(el => {
+            // Monitora a animação do contador e limpa o % assim que o JS tentar colocar
+            const observer = new MutationObserver(() => {
+                if (el.innerText.includes('%')) {
+                    el.innerText = el.innerText.replace(/%/g, '');
+                }
+            });
+            observer.observe(el, { childList: true, characterData: true, subtree: true });
+        });
+    });
+</script>
 
 <!-- Seção de pilares/jornada do ecossistema -->
 <section class="planos" id="jornada">
