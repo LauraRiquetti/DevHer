@@ -9,10 +9,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\CarrinhoController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ComunidadeController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PagamentoController;
 use App\Http\Controllers\ProjetoController;
+use App\Http\Controllers\RespostaController;
+use App\Http\Controllers\TopicoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedoraController;
 
@@ -42,6 +45,11 @@ Route::view('/redefinir-senha/{token}', 'auth.reset-password')->name('password.r
 // Catálogos e Vitrines
 Route::get('/projetos', [ProjetoController::class, 'index'])->name('projetos.index');
 Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
+
+// Comunidade / Fórum (visualização é pública; postar exige login, ver mais abaixo)
+Route::get('/comunidades', [ComunidadeController::class, 'index'])->name('comunidades.index');
+Route::get('/comunidades/{comunidade}', [ComunidadeController::class, 'show'])->name('comunidades.show');
+Route::get('/topicos/{topico}', [TopicoController::class, 'show'])->name('topicos.show');
 
 // Vendedoras / Criadoras / Perfil Público
 Route::get('/vendedoras', [VendedoraController::class, 'index'])->name('vendedoras.index');
@@ -88,6 +96,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cursos/novo', [CursoController::class, 'create'])->name('cursos.create');
     Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.store');
 
+    // Comunidade / Fórum: abrir tópico e responder (exige login)
+    Route::get('/comunidades/{comunidade}/novo-topico', [TopicoController::class, 'create'])->name('topicos.create');
+    Route::post('/comunidades/{comunidade}/topicos', [TopicoController::class, 'store'])->name('topicos.store');
+    Route::post('/topicos/{topico}/respostas', [RespostaController::class, 'store'])->name('respostas.store');
+
     // Pedidos e Checkout de Pagamento
     Route::view('/meus-pedidos', 'Loja.meus_pedidos')->name('meus-pedidos');
     Route::post('/checkout/processar', [PagamentoController::class, 'processar'])->name('pagamento.processar');
@@ -110,6 +123,10 @@ Route::post('/carrinho/adicionar/{tipo}/{id}', [CarrinhoController::class, 'adic
 // (lá em cima, dentro do grupo 'auth') para que '/cursos/novo' continue sendo
 // reconhecida corretamente e não seja capturada por esse parâmetro genérico {curso}.
 Route::get('/cursos/{curso}', [CursoController::class, 'show'])->name('cursos.show');
+
+// Página de detalhes do projeto (pública). Mesmo motivo acima: fica DEPOIS de
+// '/projetos/novo' para essa rota específica continuar funcionando normalmente.
+Route::get('/projetos/{projeto}', [ProjetoController::class, 'show'])->name('projetos.show');
 
 
 /*

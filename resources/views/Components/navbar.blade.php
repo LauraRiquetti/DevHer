@@ -6,7 +6,7 @@
             <span class="dot"></span>DevHer
         </a>
         <ul class="nav-links">
-            <li><a href="{{ url('/#comunidade') }}">Comunidade</a></li>
+            <li><a href="{{ route('comunidades.index') }}">Comunidade</a></li>
             <li><a href="{{ route('cursos.index') ?? '#' }}">Cursos</a></li>
             <li><a href="{{ route('projetos.index') ?? '#' }}">Marketplace</a></li>
             <li><a href="{{ url('/#como-funciona') }}">Como funciona</a></li>

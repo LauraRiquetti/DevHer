@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         // Chama e executa as outras classes de Seeder na ordem definida
         $this->call([
             AdminSeeder::class, // Executa o cadastro automático do Admin
+            ComunidadeSeeder::class,
             ProjetoSeeder::class,
             CursoSeeder::class,
         ]);

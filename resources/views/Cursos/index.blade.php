@@ -46,10 +46,7 @@
             </div>
 
             @auth
-                {{-- Exibe o botão apenas para vendedoras ou administradores --}}
-                @if(in_array(auth()->user()->role, ['vendedora', 'admin']))
-                    <a href="{{ route('cursos.create') }}" class="btn btn-primary btn-sm">+ Publicar curso</a>
-                @endif
+                <a href="{{ route('cursos.create') }}" class="btn btn-primary btn-sm">+ Publicar curso</a>
             @endauth
         </form>
 
@@ -98,12 +95,20 @@
                         <p style="font-size:12px;color:var(--muted-2);margin-top:10px;">
                             Este curso é liberado apenas para usuárias com 18 anos ou mais.
                         </p>
-                        <button class="btn btn-ghost btn-sm btn-block" disabled style="opacity:0.6; cursor:not-allowed; margin-top:12px;">
+                        {{-- Botão "Saiba mais": leva para a página de descrição do curso --}}
+                        <a href="{{ route('cursos.show', $curso->id) }}" class="btn btn-primary btn-sm btn-block" style="margin-top:12px;">
+                            Saiba mais
+                        </a>
+                        <button class="btn btn-ghost btn-sm btn-block" disabled style="opacity:0.6; cursor:not-allowed; margin-top:10px;">
                             Indisponível
                         </button>
                     @else
+                        {{-- Botão "Saiba mais": leva para a página de descrição do curso --}}
+                        <a href="{{ route('cursos.show', $curso->id) }}" class="btn btn-primary btn-sm btn-block" style="margin-top:12px;">
+                            Saiba mais
+                        </a>
                         {{-- Mesmo padrão de rota usado no marketplace, trocando 'tipo' para 'curso' --}}
-                        <form method="POST" action="{{ route('carrinho.add', ['tipo' => 'curso', 'id' => $curso->id]) }}" style="margin-top:12px;">
+                        <form method="POST" action="{{ route('carrinho.add', ['tipo' => 'curso', 'id' => $curso->id]) }}" style="margin-top:10px;">
                             @csrf
                             <button type="submit" class="btn btn-ghost btn-sm btn-block">Adicionar ao carrinho</button>
                         </form>
