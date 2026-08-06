@@ -46,7 +46,10 @@
             </div>
 
             @auth
-                <a href="{{ route('cursos.create') }}" class="btn btn-primary btn-sm">+ Publicar curso</a>
+                {{-- Exibe o botão apenas para vendedoras ou administradores --}}
+                @if(in_array(auth()->user()->role, ['vendedora', 'admin']))
+                    <a href="{{ route('cursos.create') }}" class="btn btn-primary btn-sm">+ Publicar curso</a>
+                @endif
             @endauth
         </form>
 

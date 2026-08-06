@@ -61,8 +61,9 @@ class CursoController extends Controller
         }
 
         // Interrompe com HTTP 403 caso o perfil do usuário não seja "vendedora"
-        if (strtolower(Auth::user()->tipo) !== 'vendedora') {
-            abort(403, 'Acesso não autorizado. Apenas usuárias do tipo vendedora podem publicar cursos.');
+        if (!in_array(auth()->user()->role, ['vendedora', 'admin'])) {
+            return redirect()->route('cursos.index')
+                ->with('erro', 'Você não tem permissão para publicar cursos.');
         }
 
         return view('cursos.create');

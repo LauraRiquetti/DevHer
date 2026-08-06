@@ -46,7 +46,10 @@
             </div>
 
             @auth
-                <a href="{{ route('projetos.create') }}" class="btn btn-primary btn-sm">+ Publicar projeto</a>
+                {{-- Exibe o botão apenas se o usuário for 'vendedora' ou 'admin' --}}
+                @if(in_array(auth()->user()->role, ['vendedora', 'admin']))
+                    <a href="{{ route('projetos.create') }}" class="btn btn-primary btn-sm">+ Publicar projeto</a>
+                @endif
             @endauth
         </form>
 
