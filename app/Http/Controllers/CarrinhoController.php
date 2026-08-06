@@ -29,16 +29,19 @@ class CarrinhoController extends Controller
 
         // 3. Adiciona ou atualiza no carrinho
         if (isset($carrinho[$chave])) {
-            // Cursos geralmente não precisam de quantidade > 1 por conta
             if ($tipo !== 'curso') {
                 $carrinho[$chave]['quantidade']++;
             }
         } else {
+            // Busca o valor tratando possíveis variações nos nomes das colunas
+            $precoItem = $item->preco ?? $item->valor ?? 0;
+            $nomeItem  = $item->nome ?? $item->titulo ?? 'Item sem nome';
+
             $carrinho[$chave] = [
                 'id'         => $item->id,
                 'tipo'       => $tipo,
-                'nome'       => $item->nome, 
-                'preco'      => $item->preco, 
+                'nome'       => $nomeItem,
+                'preco'      => $precoItem, 
                 'quantidade' => 1,
             ];
         }
@@ -55,9 +58,11 @@ class CarrinhoController extends Controller
     {
         $carrinho = session()->get('carrinho', []);
 
-        // Calcula o valor total do carrinho
+        // Calcula o valor total tratando os formatos de preço
         $total = array_reduce($carrinho, function ($acc, $item) {
-            return $acc + ($item['preco'] * $item['quantidade']);
+            $preco = $this->converterPrecoParaFloat($item['preco'] ?? $item['valor'] ?? 0);
+            $qty   = (int) ($item['quantidade'] ?? 1);
+            return $acc + ($preco * $qty);
         }, 0);
 
         return view('loja.carrinho', compact('carrinho', 'total'));
@@ -85,5 +90,26 @@ class CarrinhoController extends Controller
     {
         session()->forget('carrinho');
         return redirect()->back()->with('sucesso', 'Carrinho limpo.');
+    }
+
+    /**
+     * Função auxiliar de conversão de preço
+     */
+    private function converterPrecoParaFloat($preco): float
+    {
+        if (empty($preco)) return 0.0;
+
+        if (is_numeric($preco) && !is_string($preco)) {
+            return (float) $preco;
+        }
+
+        $precoStr = str_replace(['R$', '$', ' '], '', (string) $preco);
+
+        if (str_contains($precoStr, ',')) {
+            $precoStr = str_replace('.', '', $precoStr);
+            $precoStr = str_replace(',', '.', $precoStr);
+        }
+
+        return (float) $precoStr;
     }
 }

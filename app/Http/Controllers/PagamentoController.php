@@ -22,33 +22,41 @@ class PagamentoController extends Controller
             return redirect()->route('carrinho.index')->with('erro', 'Seu carrinho está vazio.');
         }
 
-        // 2. Monta os itens tratando o formato do preço
+        // 2. Monta os itens tratando o preço com precisão
         $items = [];
         $valorTotal = 0; 
+        $user = Auth::user();
 
         foreach ($carrinho as $item) {
-            // Trata o preço limpando 'R$', espaços e trocando vírgula por ponto
-            $precoLimpo = $item['preco'];
-            if (is_string($precoLimpo)) {
-                $precoLimpo = str_replace(['R$', ' ', '.'], '', $precoLimpo);
-                $precoLimpo = str_replace(',', '.', $precoLimpo);
+            // Aceita 'preco' ou 'valor' vindo da sessão
+            $precoBruto = $item['preco'] ?? $item['valor'] ?? 0;
+            $precoFloat = $this->converterPrecoParaFloat($precoBruto);
+            $quantidade = (int) ($item['quantidade'] ?? 1);
+
+            // Ignora itens zerados/gratuitos (Mercado Pago exige unit_price > 0)
+            if ($precoFloat <= 0) {
+                continue;
             }
-            $precoFloat = (float) $precoLimpo;
 
             $items[] = [
                 'id'          => (string) $item['id'],
-                'title'       => '[' . strtoupper($item['tipo']) . '] ' . $item['nome'],
-                'quantity'    => (int) $item['quantidade'],
-                'unit_price'  => $precoFloat,
+                'title'       => substr('[' . strtoupper($item['tipo'] ?? 'PRODUTO') . '] ' . ($item['nome'] ?? 'Item'), 0, 255),
+                'quantity'    => $quantidade,
+                'unit_price'  => (float) number_format($precoFloat, 2, '.', ''), // Formata 15.00
                 'currency_id' => 'BRL'
             ];
             
-            $valorTotal += $precoFloat * (int) $item['quantidade'];
+            $valorTotal += $precoFloat * $quantidade;
+        }
+
+        // Se o carrinho só tinha itens inválidos ou zerados
+        if (empty($items)) {
+            return redirect()->route('carrinho.index')->with('erro', 'O carrinho não possui itens pagos válidos para processar o pagamento.');
         }
 
         // 3. Salva o Pedido no Banco
         $pedido = Pedido::create([
-            'user_id'     => Auth::id(),
+            'user_id'     => $user->id,
             'valor_total' => $valorTotal,
             'status'      => 'pendente',
             'itens'       => json_encode($carrinho) 
@@ -62,19 +70,35 @@ class PagamentoController extends Controller
             $requisicao->withoutVerifying();
         }
 
-        // 5. Chamada para a API do Mercado Pago
-        $response = $requisicao->post('https://api.mercadopago.com/checkout/preferences', [
+        // 5. Monta o Payload da Preferência
+        $payload = [
             'items' => $items,
-            'external_reference' => (string) $pedido->id, 
-            'back_urls' => [
+            'external_reference' => (string) $pedido->id,
+            'payer' => [
+                'name'  => $user->name ?? 'Cliente',
+                'email' => $user->email,
+            ],
+        ];
+
+        // Se NÃO estiver rodando em localhost, envia as back_urls
+        $host = $request->getHost();
+        $isLocalhost = in_array($host, ['localhost', '127.0.0.1']) 
+                    || str_ends_with($host, '.test') 
+                    || str_ends_with($host, '.local');
+
+        if (!$isLocalhost) {
+            $payload['back_urls'] = [
                 'success' => route('pagamento.sucesso'),
                 'failure' => route('pagamento.falha'), 
                 'pending' => route('pagamento.pendente'), 
-            ],
-            // 'auto_return' => 'approved', // Desativado para evitar bloqueio em localhost sem HTTPS
-        ]);
+            ];
+            $payload['auto_return'] = 'approved';
+        }
 
-        // 6. Resposta com Sucesso
+        // 6. Chamada para a API do Mercado Pago
+        $response = $requisicao->post('https://api.mercadopago.com/checkout/preferences', $payload);
+
+        // 7. Resposta com Sucesso
         if ($response->successful()) {
             $preference = $response->json();
             $pedido->update(['transacao_id' => $preference['id']]);
@@ -83,15 +107,35 @@ class PagamentoController extends Controller
             return redirect()->away($linkPagamento);
         }
         
-        // 7. Se falhar, mostra o erro detalhado para diagnóstico
+        // 8. Diagnóstico de Erro (se ocorrer qualquer outro motivo)
         $pedido->delete();
         
         dd([
-            'mensagem' => 'O Mercado Pago recusou a requisição.',
-            'status_http' => $response->status(),
-            'resposta_api' => $response->json(),
-            'token_usado' => $token ? 'Token Presente' : 'TOKEN AUSENTE OU NULO! Verifique config/services.php'
+            'MOTIVO_EXATO'    => $response->json()['cause'] ?? $response->json()['message'] ?? 'Erro no Mercado Pago',
+            'PAYLOAD_ENVIADO' => $payload,
+            'RESPOSTA_API'    => $response->json()
         ]);
+    }
+
+    /**
+     * Função auxiliar para converter preços para float puro
+     */
+    private function converterPrecoParaFloat($preco): float
+    {
+        if (empty($preco)) return 0.0;
+
+        if (is_numeric($preco) && !is_string($preco)) {
+            return (float) $preco;
+        }
+
+        $precoStr = str_replace(['R$', '$', ' '], '', (string) $preco);
+
+        if (str_contains($precoStr, ',')) {
+            $precoStr = str_replace('.', '', $precoStr);
+            $precoStr = str_replace(',', '.', $precoStr);
+        }
+
+        return (float) $precoStr;
     }
 
     public function sucesso(Request $request)
