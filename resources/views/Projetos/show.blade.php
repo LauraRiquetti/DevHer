@@ -22,11 +22,9 @@
 
         <div style="display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start;">
 
-            {{-- Imagem do projeto --}}
-            <div class="proj-thumb" style="flex:1 1 320px; max-width:420px; aspect-ratio:4/3; border-radius:12px; overflow:hidden;">
-                @if($projeto->imagem)
-                    <img src="{{ $projeto->imagem }}" alt="{{ $projeto->nome }}" style="width:100%; height:100%; object-fit:cover;">
-                @endif
+            {{-- Nome do projeto centralizado no lugar da imagem --}}
+            <div class="proj-thumb proj-thumb-nome" style="flex:1 1 320px; max-width:420px; aspect-ratio:4/3; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px;">
+                <span style="color:#fff; font-weight:700; font-size:1.4rem; line-height:1.35; text-shadow:0 1px 3px rgba(0,0,0,0.25);">{{ $projeto->nome }}</span>
             </div>
 
             {{-- Informações do projeto --}}

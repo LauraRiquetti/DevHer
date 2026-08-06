@@ -56,10 +56,8 @@
                 <div class="proj-card">
                     {{-- Miniatura + título clicáveis, levando para a página de detalhes do projeto --}}
                     <a href="{{ route('projetos.show', $projeto->id) }}" style="display:block; text-decoration:none; color:inherit;">
-                        <div class="proj-thumb">
-                            @if($projeto->imagem)
-                                <img src="{{ $projeto->imagem }}" alt="{{ $projeto->nome }}" style="width:100%; height:100%; object-fit:cover;">
-                            @endif
+                        <div class="proj-thumb proj-thumb-nome">
+                            <span>{{ $projeto->nome }}</span>
                         </div>
 
                         <span class="categoria" style="text-transform: capitalize;">{{ $projeto->status }}</span>
@@ -101,6 +99,26 @@
         </div>
 
         <style>
+            /* Nome do projeto centralizado dentro do quadrado, no lugar da imagem */
+            .proj-thumb-nome {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                padding: 20px !important;
+            }
+            .proj-thumb-nome span {
+                display: -webkit-box !important;
+                color: #fff;
+                font-weight: 700;
+                font-size: 1.05rem;
+                line-height: 1.35;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
             /* Esconde a versão simplificada (mobile) da paginação padrão do Laravel,
                que só existia por causa da classe Tailwind "sm:hidden" (inerte sem Tailwind) */
             .proj-pagination nav[role="navigation"] > div[class*="sm:hidden"] {

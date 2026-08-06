@@ -61,10 +61,8 @@
                 <div class="proj-card" style="{{ $bloqueado ? 'opacity:.55;' : '' }}">
                     {{-- Miniatura + título clicáveis, levando para a página de detalhes do curso --}}
                     <a href="{{ route('cursos.show', $curso->id) }}" style="display:block; text-decoration:none; color:inherit;">
-                        <div class="proj-thumb">
-                            @if($curso->imagem)
-                                <img src="{{ $curso->imagem }}" alt="{{ $curso->nome }}" style="width:100%; height:100%; object-fit:cover;">
-                            @endif
+                        <div class="proj-thumb proj-thumb-nome">
+                            <span>{{ $curso->nome }}</span>
                         </div>
 
                         @if($curso->categoria)
@@ -118,6 +116,31 @@
                 <p style="color:var(--muted);">Nenhum curso encontrado para este filtro.</p>
             @endforelse
         </div>
+
+        {{-- Este CSS fica FORA do @if de paginação de propósito: $cursos hoje vem de ->get()
+             (não ->paginate()), então method_exists($cursos, 'links') é false e qualquer coisa
+             dentro daquele @if nunca chega a ser renderizada. --}}
+        <style>
+            /* Nome do curso centralizado dentro do quadrado, no lugar da imagem */
+            .proj-thumb-nome {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                padding: 20px !important;
+            }
+            .proj-thumb-nome span {
+                display: -webkit-box !important;
+                color: #fff;
+                font-weight: 700;
+                font-size: 1.05rem;
+                line-height: 1.35;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+        </style>
 
         {{-- Paginação --}}
         @if (method_exists($cursos, 'links'))
