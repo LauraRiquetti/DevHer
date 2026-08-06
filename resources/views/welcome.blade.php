@@ -219,22 +219,6 @@
     </style>
 </section>
 
-<!-- Seção de apoio / comunidades parceiras -->
-<section class="apoio">
-    <div class="wrap">
-        <p>Redes e iniciativas que caminham com a gente</p>
-        <!-- Chips/tags com nomes das comunidades representadas -->
-        <div class="apoio-row">
-            <a href="{{ route('comunidades.show', 'pyladies') }}" class="chip" style="text-decoration:none; cursor:pointer;">PyLadies</a>
-            <a href="{{ route('comunidades.show', 'women-techmakers') }}" class="chip" style="text-decoration:none; cursor:pointer;">Women Techmakers</a>
-            <a href="{{ route('comunidades.show', 'meninas-digitais') }}" class="chip" style="text-decoration:none; cursor:pointer;">Meninas Digitais</a>
-            <a href="{{ route('comunidades.show', 'programadas') }}" class="chip" style="text-decoration:none; cursor:pointer;">ProgramAdas</a>
-            <a href="{{ route('comunidades.show', 'rails-girls') }}" class="chip" style="text-decoration:none; cursor:pointer;">Rails Girls</a>
-            <a href="{{ route('comunidades.show', 'marias-da-tech') }}" class="chip" style="text-decoration:none; cursor:pointer;">Marias da Tech</a>
-        </div>
-    </div>
-</section>
-
 <!-- Seção do passo a passo do fluxo da aplicação -->
 <section class="how" id="como-funciona">
     <div class="wrap">
@@ -250,6 +234,91 @@
         </div>
     </div>
 </section>
+
+<!-- Seção de apoio / comunidades parceiras -->
+<section class="apoio apoio-grande">
+    <div class="wrap apoio-inner">
+        {{-- Persona ao lado esquerdo, igual ao navbar --}}
+        <div class="apoio-persona">
+            <img src="{{ asset('images/persona-devher.png') }}" alt="Persona DevHer" class="apoio-persona-img">
+        </div>
+        <div class="apoio-content">
+            <p>Redes e iniciativas que caminham com a gente</p>
+            <!-- Chips/tags com nomes das comunidades representadas -->
+            <div class="apoio-row">
+                <a href="{{ route('comunidades.show', 'pyladies') }}" class="chip" style="text-decoration:none; cursor:pointer;">PyLadies</a>
+                <a href="{{ route('comunidades.show', 'women-techmakers') }}" class="chip" style="text-decoration:none; cursor:pointer;">Women Techmakers</a>
+                <a href="{{ route('comunidades.show', 'meninas-digitais') }}" class="chip" style="text-decoration:none; cursor:pointer;">Meninas Digitais</a>
+                <a href="{{ route('comunidades.show', 'programadas') }}" class="chip" style="text-decoration:none; cursor:pointer;">ProgramAdas</a>
+                <a href="{{ route('comunidades.show', 'rails-girls') }}" class="chip" style="text-decoration:none; cursor:pointer;">Rails Girls</a>
+                <a href="{{ route('comunidades.show', 'marias-da-tech') }}" class="chip" style="text-decoration:none; cursor:pointer;">Marias da Tech</a>
+            </div>
+        </div>
+    </div>
+
+    {{-- Estilo: seção maior + persona à esquerda --}}
+    <style>
+        .apoio-grande {
+            padding: 72px 0;
+        }
+        .apoio-inner {
+            display: flex !important;
+            align-items: center;
+            justify-content: flex-start !important;
+            gap: 40px;
+            flex-wrap: wrap;
+            text-align: left !important;
+        }
+        .apoio-persona {
+            flex: 0 0 auto;
+        }
+        .apoio-persona-img {
+            width: 260px;
+            height: 260px;
+            border-radius: 20px;
+            object-fit: cover;
+            display: block;
+            box-shadow: 0 12px 32px rgba(255, 45, 135, 0.25);
+        }
+        .apoio-content {
+            flex: 1 1 380px;
+            text-align: left;
+        }
+        .apoio-content p {
+            text-align: left;
+            font-size: 1.2rem;
+            margin-bottom: 22px;
+        }
+        .apoio-content .apoio-row {
+            justify-content: flex-start;
+        }
+        .apoio-content .chip {
+            font-size: 1rem;
+            padding: 12px 22px;
+        }
+        /* Em telas menores, empilha e centraliza pra não espremer */
+        @media (max-width: 720px) {
+            .apoio-inner {
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            .apoio-content {
+                text-align: center;
+            }
+            .apoio-content p {
+                text-align: center;
+            }
+            .apoio-content .apoio-row {
+                justify-content: center;
+            }
+            .apoio-persona-img {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</section>
+
 
 {{-- Seção de Marketplace --}}
 <section class="feature" id="marketplace">
@@ -345,68 +414,33 @@
 </section>
 
 {{-- Seção de Estatísticas do Ecossistema --}}
-{{-- Seção de Estatísticas do Ecossistema --}}
-<section class="stats">
-    {{-- CSS para garantir que % apareça APENAS na taxa da plataforma --}}
-    <style>
-        .stats-grid .stat-num::after {
-            content: "" !important; /* Remove o % dos contadores normais */
-        }
-        .stats-grid .stat-percent::after {
-            content: "%" !important; /* Adiciona o % apenas na taxa */
-        }
-    </style>
-    
-{{-- Seção de Estatísticas do Ecossistema --}}
 <section class="stats">
     <div class="wrap">
         <h2 class="reveal">Cada número representa uma trajetória que continuou.</h2>
         <div class="stats-grid">
-            
             <!-- Total de criadoras cadastradas -->
             <div class="reveal">
-                <div class="stat-num stat-clean" data-count="{{ $totalCriadoras > 0 ? $totalCriadoras : 18 }}">{{ $totalCriadoras }}</div>
+                <div class="stat-num" data-count="{{ $totalCriadoras > 0 ? $totalCriadoras : 18 }}">{{ $totalCriadoras }}</div>
                 <div class="stat-label">criadoras cadastradas na plataforma</div>
             </div>
-
             <!-- Total de projetos publicados no marketplace -->
             <div class="reveal">
-                <div class="stat-num stat-clean" data-count="{{ $totalProjetos > 0 ? $totalProjetos : 10 }}">{{ $totalProjetos }}</div>
+                <div class="stat-num" data-count="{{ $totalProjetos > 0 ? $totalProjetos : 10 }}">{{ $totalProjetos }}</div>
                 <div class="stat-label">projetos ativos no marketplace</div>
             </div>
-
             <!-- Indicador estático de disponibilidade de conteúdo -->
             <div class="reveal">
                 <div class="stat-static" style="font-size: var(--stat-size, 3rem); font-weight: 800; color: var(--pink-main, #ff2d87);">24h</div>
                 <div class="stat-label">de conteúdo disponível</div>
             </div>
-
-            <!-- Indicador estático de porcentagem da taxa da plataforma (este sim mantém o %) -->
+            <!-- Indicador estático de porcentagem da taxa da plataforma -->
             <div class="reveal">
                 <div class="stat-num" data-count="5">5</div>
                 <div class="stat-label">de taxa sobre vendas no ecossistema</div>
             </div>
-
         </div>
     </div>
 </section>
-
-{{-- Script para remover o % que o JS do tema injeta automaticamente --}}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const cleanElements = document.querySelectorAll('.stat-clean');
-        
-        cleanElements.forEach(el => {
-            // Monitora a animação do contador e limpa o % assim que o JS tentar colocar
-            const observer = new MutationObserver(() => {
-                if (el.innerText.includes('%')) {
-                    el.innerText = el.innerText.replace(/%/g, '');
-                }
-            });
-            observer.observe(el, { childList: true, characterData: true, subtree: true });
-        });
-    });
-</script>
 
 <!-- Seção de pilares/jornada do ecossistema -->
 <section class="planos" id="jornada">
